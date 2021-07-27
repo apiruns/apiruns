@@ -6,6 +6,9 @@ tests: ['B201', 'B301']
 # (optional) list skipped tests here:
 skips: ['B101', 'B601']
 
+assert_used:
+  skips: ['*_test.py', 'test_*.py']
+
 ### override settings - used to set settings for plugins to non-default values
 
 any_other_function_with_shell_equals_true:
