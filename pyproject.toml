@@ -10,6 +10,7 @@ Django = "^3.2.5"
 flake8 = "^3.9.2"
 bandit = "^1.7.0"
 django-environ = "^0.4.5"
+djangorestframework = "^3.12.4"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
