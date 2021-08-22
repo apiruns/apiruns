@@ -1,15 +1,16 @@
 [tool.poetry]
 name = "apisrun"
-version = "0.1.0"
+version = "0.0.1"
 description = "Apisrun is a service that allows you to create micro-services from a dynamic structure."
 authors = ["Jose Salas <josephsalas.developer@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-Django = "^3.2.5"
 flake8 = "^3.9.2"
 bandit = "^1.7.0"
-django-environ = "^0.4.5"
+fastapi = "^0.68.0"
+uvicorn = "^0.15.0"
+pymongo = "^3.12.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
