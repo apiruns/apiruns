@@ -1,11 +1,13 @@
 from typing import Optional, List
 
-from fastapi import FastAPI, status
+from fastapi import FastAPI, status, HTTPException, Body
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
+from pydantic import ValidationError
 from app.api import models
 from app.api.constants import routes
 from app.api.engines import db
+from app.api.meta import get_meta_validator
 
 app = FastAPI()
 
@@ -23,18 +25,33 @@ async def create_node(node: models.Node):
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=created_node)
 
 @app.get("/admin/nodes", response_model=List[models.Node])
-async def get_nodes():
+async def list_nodes():
     nodes = await db["nodes"].find({}).to_list(10)
     return nodes
 
 # Node level one.
 @app.get(routes.LevelOne.PATH)
-def node_level_one_get(level_one: str) -> str:
-    return "one"
+async def node_level_one_get(level_one: str) -> List:
+    obj = await db["nodes"].find_one({"path": f"/{level_one}", "is_active": True})
+    if obj is not None:
+        nodes = await db[obj["algo"]].find({}, {"_id": 0}).to_list(10)
+        return nodes
+
+    raise HTTPException(status_code=404, detail=f"Resource {level_one} not found")
 
 @app.post(routes.LevelOne.PATH)
-def node_level_one_post(level_one: str) -> str:
-    return "two"
+async def node_level_one_post(level_one: str, payload: dict = Body(...)) -> dict:
+    obj = await db["nodes"].find_one({"path": f"/{level_one}", "is_active": True})
+    if obj is not None:
+        validator = get_meta_validator(obj["structure"])
+        try:
+            este = validator(**payload)
+            response = await db[obj["algo"]].insert_one(jsonable_encoder(payload))
+            return payload
+        except ValidationError as e:
+            print(e.json())
+
+    raise HTTPException(status_code=400, detail=f"Resource {level_one} not found")
 
 
 # Node level two.
