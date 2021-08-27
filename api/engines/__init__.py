@@ -1,5 +1,5 @@
-from app.api import configs
-from app.api.engines.mongo import db as db_mongo
+from api import configs
+from api.engines.mongo import db as db_mongo
 
 ENGINE_TYPES = {
     "MONGO": db_mongo

@@ -1,4 +1,4 @@
-from app.api import configs
+from api import configs
 import motor.motor_asyncio
 
 
