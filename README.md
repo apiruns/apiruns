@@ -14,7 +14,7 @@ poetry install && poetry shell
 2. Launch the service.
 
 ```bash
-uvicorn app.api.main:app
+uvicorn api.main:app
 ```
 
 3. Versifying service.
