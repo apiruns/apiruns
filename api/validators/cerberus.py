@@ -1,6 +1,6 @@
 from cerberus import Validator
 from cerberus.schema import SchemaError
-from api.constants.validator import ValidationErrorResponse
+from api.constants import ValidationErrorResponse
 
 
 class CerberusValidator:
