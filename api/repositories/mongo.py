@@ -10,11 +10,16 @@ class MongoRepository:
         return response
 
     @staticmethod
-    async def find(model, limit=10) -> dict:
-        response = await db[model].find({}, {"_id": 0}).to_list(limit)
+    async def find(model, limit, params) -> dict:
+        response = await db[model].find({"is_active": True, **params}, {"_id": 0}).to_list(limit)
+        return response
+
+    @staticmethod
+    async def count(model, params) -> int:
+        response = await db[model].count_documents({"is_active": True, **params})
         return response
 
     @staticmethod
     async def find_one(model, params) -> dict:
-        response = await db[model].find_one({**params, "is_active": True})
+        response = await db[model].find_one({"is_active": True, **params})
         return response
