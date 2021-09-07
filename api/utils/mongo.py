@@ -1,6 +1,13 @@
 from bson import ObjectId
 
+
 class PyObjectId(ObjectId):
+    """Serializer object mongo
+
+    Args:
+        ObjectId (ObjectId): Object ID mongo.
+    """
+
     @classmethod
     def __get_validators__(cls):
         yield cls.validate
