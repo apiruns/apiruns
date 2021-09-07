@@ -3,6 +3,7 @@ import motor.motor_asyncio
 
 
 class MongoEngine(object):
+    """Mongo client"""
 
     _instance = None
 
@@ -11,5 +12,6 @@ class MongoEngine(object):
             client = motor.motor_asyncio.AsyncIOMotorClient(configs.ENGINE_URI)
             MongoEngine._instance = client[configs.ENGINE_DB_NAME]
         return MongoEngine._instance
+
 
 db = MongoEngine()

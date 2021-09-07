@@ -7,7 +7,17 @@ from api.validators import validate
 from fastapi import status
 from api.utils.errors import custom_http_exception
 
+
 class Node(BaseModel):
+    """Validation when creating node.
+
+    Args:
+        BaseModel: BaseModel of pydantic.
+
+    Raises:
+        custom_http_exception: Custom exception http with error json.
+    """
+
     reference_id: UUID = Field(default_factory=uuid4, alias="id")
     path: str
     schema_name: dict = Field(alias="schema")
@@ -16,21 +26,43 @@ class Node(BaseModel):
     is_active: bool = True
     created_at: Optional[datetime] = datetime.now()
 
-
     class Config:
+        """Config of class Node"""
+
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
-        schema_extra = {}
 
-    @validator('model_name')
-    def name_model_name(cls, v):
+    @validator("model_name")
+    def name_model_name(cls, v) -> str:
+        """Validate model name.
+
+        Args:
+            v (str): Model name.
+
+        Raises:
+            ValueError: error when validating model name.
+
+        Returns:
+            str: Model name.
+        """
         m = v.strip()
         if not m.isalpha():
-            raise ValueError('the model only allows letters without spaces.')
+            raise ValueError("the model only allows letters without spaces.")
         return m
 
-    @validator('schema_name')
-    def name_schema_name(cls, v):
+    @validator("schema_name")
+    def name_schema_name(cls, v) -> dict:
+        """Validate schema.
+
+        Args:
+            v (dict): Schema.
+
+        Raises:
+            ValueError: error when validating schema.
+
+        Returns:
+            dict: schema.
+        """
         r = validate.schema(v)
         if r:
             raise custom_http_exception(
@@ -38,12 +70,23 @@ class Node(BaseModel):
                 loc=["body", "model"],
                 msg="errors in the validation of the schema.",
                 type_name="schema",
-                errors=ast.literal_eval(str(r))
+                errors=ast.literal_eval(str(r)),
             )
         return v
 
-    @validator('path')
+    @validator("path")
     def name_path(cls, v):
+        """Validate path name.
+
+        Args:
+            v (str): Path name.
+
+        Raises:
+            ValueError: error when validating path name.
+
+        Returns:
+            str: Path name.
+        """
         p = v.strip()
         if not p.startswith("/"):
             raise ValueError("the path must start with the '/' character.")
@@ -53,10 +96,12 @@ class Node(BaseModel):
 
         for row in p.split("/"):
             if not cls._validate_path_row(cls, row):
-                raise ValueError("the path must only contain letters and the '/' character.")
+                raise ValueError(
+                    "the path must only contain letters and the '/' character."
+                )
         return p
 
-    def _validate_path_row(cls, v) -> False:
+    def _validate_path_row(cls, v) -> bool:
         if v.isalpha() or v == "":
             return True
         return False

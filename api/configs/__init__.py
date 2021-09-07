@@ -1,1 +1,1 @@
-from api.configs.app import *
+from api.configs.app import *  # noqa
