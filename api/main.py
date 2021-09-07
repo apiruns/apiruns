@@ -20,6 +20,7 @@ def ping() -> models.Ping:
 @app.post(RouterPath.NODES, response_model=models.Node)
 async def create_node(node: models.Node):
     payload = jsonable_encoder(node)
+    await validate.node(node.model_name, node.path)
     response = await repository.create_one(payload, "nodes")
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=response)
 
@@ -30,16 +31,16 @@ async def list_nodes():
 
 # Node level one.
 @app.get(RouterPath.LEVEL_ONE)
-async def node_level_one_get(level_one: str) -> List:
+async def dynamic_node_level_one_get(level_one: str) -> List:
     node = await repository.find_one("nodes", {"path": f"/{level_one}"})
     if node is not None:
         nodes = await repository.find(node["model"])
         return nodes
 
-    raise HTTPException(status_code=404, detail=f"Resource {level_one} not found")
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Resource {level_one} not found")
 
 @app.post(RouterPath.LEVEL_ONE)
-async def node_level_one_post(level_one: str, payload: dict = Body(...)) -> dict:
+async def dynamic_node_level_one_post(level_one: str, payload: dict = Body(...)) -> dict:
     node = await repository.find_one("nodes", {"path": f"/{level_one}"})
     if node is not None:
         payload = jsonable_encoder(payload)
@@ -50,4 +51,4 @@ async def node_level_one_post(level_one: str, payload: dict = Body(...)) -> dict
             response = await repository.create_one(payload, node["model"])
             return JSONResponse(status_code=status.HTTP_201_CREATED, content=response)
 
-    raise HTTPException(status_code=404, detail=f"Resource {level_one} not found")
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Resource {level_one} not found")

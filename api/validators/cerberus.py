@@ -1,9 +1,10 @@
 from cerberus import Validator
 from cerberus.schema import SchemaError
 from api.constants import ValidationErrorResponse
+from api.validators.base import ValidatorMixin
 
 
-class CerberusValidator:
+class CerberusValidator(ValidatorMixin):
 
     @staticmethod
     def schema(data):

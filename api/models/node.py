@@ -3,7 +3,6 @@ from uuid import UUID, uuid4
 import ast
 from typing import Optional
 from pydantic import BaseModel, Field, validator
-from api.utils import mongo
 from api.validators import validate
 from fastapi import status
 from api.utils.errors import custom_http_exception
@@ -25,9 +24,10 @@ class Node(BaseModel):
 
     @validator('model_name')
     def name_model_name(cls, v):
-        if not v.isalpha() or " " in v:
+        m = v.strip()
+        if not m.isalpha():
             raise ValueError('the model only allows letters without spaces.')
-        return v
+        return m
 
     @validator('schema_name')
     def name_schema_name(cls, v):
@@ -41,3 +41,22 @@ class Node(BaseModel):
                 errors=ast.literal_eval(str(r))
             )
         return v
+
+    @validator('path')
+    def name_path(cls, v):
+        p = v.strip()
+        if not p.startswith("/"):
+            raise ValueError("the path must start with the '/' character.")
+
+        if len(p.split("/")) == 1:
+            return "/"
+
+        for row in p.split("/"):
+            if not cls._validate_path_row(cls, row):
+                raise ValueError("the path must only contain letters and the '/' character.")
+        return p
+
+    def _validate_path_row(cls, v) -> False:
+        if v.isalpha() or v == "":
+            return True
+        return False
