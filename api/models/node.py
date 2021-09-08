@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field, validator
 from api.validators import validate
 from fastapi import status
 from api.utils.errors import custom_http_exception
+from api import configs
 
 
 class Node(BaseModel):
@@ -99,6 +100,12 @@ class Node(BaseModel):
                 raise ValueError(
                     "the path must only contain letters and the '/' character."
                 )
+        path_modified = p[:-1] if p.endswith("/") else p
+        if len(path_modified.split("/")) > configs.PATH_SECTION:
+            raise ValueError(
+                f"Only one path with a maximum of {configs.PATH_SECTION - 1} "
+                "sections is allowed."
+            )
         return p
 
     def _validate_path_row(cls, v) -> bool:

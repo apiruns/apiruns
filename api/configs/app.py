@@ -5,3 +5,4 @@ ENGINE_URI = "mongodb://root:password@localhost:27017/"
 VALIDATOR_NAME = "CERBERUS"
 
 QUERY_LIMIT = 10
+PATH_SECTION = 7
