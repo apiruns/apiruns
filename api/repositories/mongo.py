@@ -62,3 +62,31 @@ class MongoRepository:
         """
         response = await db[model].find_one(params, {"_id": 0})
         return response
+
+    @staticmethod
+    async def update_one(model, params, data) -> int:
+        """Update one document in mongo.
+
+        Args:
+            model (str): Collection name.
+            params (dict): Filters.
+
+        Returns:
+            int: Document modified count.
+        """
+        response = await db[model].update_one(params, data)
+        return response.modified_count
+
+    @staticmethod
+    async def delete_one(model, params) -> int:
+        """Delete one document in mongo.
+
+        Args:
+            model (str): Collection name.
+            params (dict): Filters.
+
+        Returns:
+            int: Document deleted count.
+        """
+        response = await db[model].delete_one(params)
+        return response.deleted_count
