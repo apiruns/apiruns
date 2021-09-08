@@ -5,9 +5,11 @@ from api.validators.base import ValidatorMixin
 
 
 class CerberusValidator(ValidatorMixin):
+    """Validator of schema with cerberus"""
 
     @staticmethod
     def schema(data):
+        """Validate schema."""
         try:
             Validator(data)
             return
@@ -16,6 +18,7 @@ class CerberusValidator(ValidatorMixin):
 
     @staticmethod
     def payload(schema, data):
+        """Validate payload wih schema."""
         if not len(data):
             return ValidationErrorResponse.PAYLOAD_NULL
 

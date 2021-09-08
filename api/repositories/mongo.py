@@ -1,4 +1,5 @@
 from api.engines import db
+from api import configs
 
 
 class MongoRepository:
@@ -20,7 +21,7 @@ class MongoRepository:
         return response
 
     @staticmethod
-    async def find(model, limit, params) -> dict:
+    async def find(model, limit=configs.QUERY_LIMIT, params={}) -> dict:
         """Find documents in mongo.
 
         Args:
@@ -31,15 +32,11 @@ class MongoRepository:
         Returns:
             list: Documents found.
         """
-        response = (
-            await db[model]
-            .find({"is_active": True, **params}, {"_id": 0})
-            .to_list(limit)
-        )
+        response = await db[model].find(params, {"_id": 0}).to_list(limit)
         return response
 
     @staticmethod
-    async def count(model, params) -> int:
+    async def count(model, params={}) -> int:
         """Quantity of documents in mongo.
 
         Args:
@@ -49,7 +46,7 @@ class MongoRepository:
         Returns:
             int: number of documents found.
         """
-        response = await db[model].count_documents({"is_active": True, **params})
+        response = await db[model].count_documents(params)
         return response
 
     @staticmethod
@@ -63,5 +60,5 @@ class MongoRepository:
         Returns:
             dict: Documents found.
         """
-        response = await db[model].find_one({"is_active": True, **params})
+        response = await db[model].find_one(params, {"_id": 0})
         return response

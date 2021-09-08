@@ -18,7 +18,7 @@ class Node(BaseModel):
         custom_http_exception: Custom exception http with error json.
     """
 
-    reference_id: UUID = Field(default_factory=uuid4, alias="id")
+    reference_id: UUID = Field(default_factory=uuid4, alias="reference_id")
     path: str
     schema_name: dict = Field(alias="schema")
     model_name: str = Field(alias="model", max_length=100)
