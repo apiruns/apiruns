@@ -1,12 +1,9 @@
 from typing import List
 
-from fastapi import FastAPI, status, HTTPException, Body
-from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, Body
 from api import models
 from api.constants import RouterPath
-from api.validators import validate
-from api.repositories import repository
+from api.services import service_node
 
 app = FastAPI()
 
@@ -19,50 +16,48 @@ def ping() -> models.Ping:
 
 # Nodes admin
 @app.post(RouterPath.NODES, response_model=models.Node)
-async def create_node(node: models.Node):
+async def create_node(body: models.Node):
     """Create a node."""
-    payload = jsonable_encoder(node)
-    await validate.node(node.model_name, node.path)
-    response = await repository.create_one(payload, "nodes")
-    return JSONResponse(status_code=status.HTTP_201_CREATED, content=response)
+    response = await service_node.create_node(body)
+    return response
 
 
 @app.get(RouterPath.NODES, response_model=List[models.Node])
 async def list_nodes():
     """List nodes."""
-    nodes = await repository.find("nodes")
-    return nodes
+    response = await service_node.list_nodes()
+    return response
 
 
 # Node level one.
 @app.get(RouterPath.LEVEL_ONE)
 async def dynamic_node_level_one_get(level_one: str) -> List:
-    """Get node level one"""
-    node = await repository.find_one("nodes", {"path": f"/{level_one}"})
-    if node is not None:
-        nodes = await repository.find(node["model"])
-        return nodes
-
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND, detail=f"Resource {level_one} not found"
-    )
+    """Get node level one."""
+    response = await service_node.get(level_one)
+    return response
 
 
 @app.post(RouterPath.LEVEL_ONE)
 async def dynamic_node_level_one_post(
     level_one: str, payload: dict = Body(...)
 ) -> dict:
-    """Post node level one"""
-    node = await repository.find_one("nodes", {"path": f"/{level_one}"})
-    if node is not None:
-        payload = jsonable_encoder(payload)
-        errors = validate.payload(node["schema"], payload)
-        if errors:
-            return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=errors)
-        else:
-            response = await repository.create_one(payload, node["model"])
-            return JSONResponse(status_code=status.HTTP_201_CREATED, content=response)
+    """Post node level one."""
+    response = await service_node.post(payload, level_one)
+    return response
 
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND, detail=f"Resource {level_one} not found"
-    )
+
+# Node level two.
+@app.get(RouterPath.LEVEL_TWO)
+async def dynamic_node_level_two_get(level_one, level_two) -> List:
+    """Get node level two."""
+    response = await service_node.get(level_one, level_two)
+    return response
+
+
+@app.post(RouterPath.LEVEL_TWO)
+async def dynamic_node_level_two_post(
+    level_one, level_two, payload: dict = Body(...)
+) -> dict:
+    """Post node level two."""
+    response = await service_node.post(payload, level_one, level_two)
+    return response
