@@ -5,10 +5,10 @@ Apisrun is a tool to create microservices in an agile way.
 
 ## Start project from docker.
 
-NOTE: Before executing the image it is necessary to have a [mongodb](https://www.mongodb.com/en/what-is-mongodb) service started locally in the port `27017`.
+NOTE: Before executing the image it is necessary to have a [mongodb](https://www.mongodb.com/en/what-is-mongodb) service started locally in the port `27017` and in the same network.
 
 ```bash
-docker run --name api -p 8000:8000 josesalasdev/apisrun
+docker run --name api --network apisrun_default -p 8000:8000 josesalasdev/apisrun
 ```
 
 This command executes a container with an api that exposes two resources on the port that was previously defined in this case `:8000`.
@@ -21,8 +21,8 @@ if you want to point to an external database engine add the following environmen
 
 ```bash
 export ENGINE_DB_NAME=mydb
-export ENGINE_URI="mongodb://root:password@localhost:27017/"
-docker run --env ENGINE_DB_NAME --env ENGINE_URI --name api -p 8000:8000 josesalasdev/apisrun
+export ENGINE_URI="mongodb://root:password@ip:27017/"
+docker run --env ENGINE_URI --env ENGINE_DB_NAME --name api -p 8000:8000 josesalasdev/apisrun
 ```
 
 ## Start project from python.
