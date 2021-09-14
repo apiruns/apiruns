@@ -1,5 +1,7 @@
 import uuid
-from typing import List, Tuple, Any
+from typing import Any
+from typing import List
+from typing import Tuple
 
 
 def paths_with_slash(path) -> List[str]:
@@ -17,7 +19,7 @@ def build_path_from_params(params: tuple) -> Tuple[str, str, Any]:
     Returns:
         (str, str, str): Return origin path, path modified and uuid.
     """
-    if validate_uuid(params[-1]):
+    if is_uuid_valid(params[-1]):
         _id = params[-1]
         original = f"/{'/'.join(params)}"
         modified = f"/{'/'.join(params[:-1])}"
@@ -27,7 +29,7 @@ def build_path_from_params(params: tuple) -> Tuple[str, str, Any]:
     return original, original, None
 
 
-def validate_uuid(value: str) -> bool:
+def is_uuid_valid(value: str) -> bool:
     """Validate if is uuid.
 
     Args:

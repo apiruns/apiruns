@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "apisrun"
 version = "0.0.1"
-description = "Apisrun is a service that allows you to create micro-services from a dynamic structure."
+description = "Apisrun is a tool to create microservices in an agile way."
 authors = ["Jose Salas <josephsalas.developer@gmail.com>"]
 
 [tool.poetry.dependencies]
