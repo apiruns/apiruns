@@ -34,7 +34,7 @@ jobs:
         poetry run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Security linter with bandit
       run: |
-        poetry run bandit -r .
+        poetry run bandit -c .bandit.yml -r .
     - name: Test with pytest
       run: |
         poetry run pytest
