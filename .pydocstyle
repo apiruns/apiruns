@@ -1,4 +1,4 @@
 [pydocstyle]
 inherit = false
 ignore = D100,D203,D405,D212,D413,D407,D406,D407,D213,D415,D400,D213,D102,D104,D105
-match_dir = ^(api)
+match = (?!tests).*\.py

@@ -1,6 +1,9 @@
 from typing import List
 
-from fastapi import FastAPI, Body, Request
+from fastapi import Body
+from fastapi import FastAPI
+from fastapi import Request
+
 from api import models
 from api.constants import RouterPath
 from api.services import service_node
