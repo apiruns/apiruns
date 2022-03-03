@@ -13,11 +13,12 @@ NOTE: Before executing the image it is necessary to have a [mongodb](https://www
 poetry install && poetry shell
 ```
 
-2. Export variables
+2. (Opcional) If you want to modify the api configuration you can make the environment variables available.
 
 ```bash
-export ENGINE_DB_NAME=mydb
-export ENGINE_URI="mongodb://root:password@ip:27017/"
+export ENGINE_NAME="MONGO"
+export ENGINE_DB_NAME="mydb"
+export ENGINE_URI="mongodb://{user}:{password}@{host|ip}:{port}/"
 ```
 
 3. Launch the service.
@@ -27,6 +28,7 @@ uvicorn api.main:app
 ```
 
 This command exposes the resource on the port `:8000`.
+
 
 Available resources:
 * API Health `GET http://localhost:8000/ping/`
