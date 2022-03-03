@@ -1,10 +1,12 @@
 import os
 
+# Engine configs
+ENGINE_URI_DEFAULT = "mongodb://0.0.0.0:27017/"
 ENGINE_NAME = os.environ.get("ENGINE_NAME", "MONGO")
-ENGINE_DB_NAME = os.environ.get("ENGINE_NAME", "apisrun")
-ENGINE_URI_DEFAULT = "mongodb://root:password@0.0.0.0:27017/"
+ENGINE_DB_NAME = os.environ.get("ENGINE_DB_NAME", "apisrun")
 ENGINE_URI = os.environ.get("ENGINE_URI", ENGINE_URI_DEFAULT)
 
+# Validator configs
 VALIDATOR_NAME = "CERBERUS"
 
 QUERY_LIMIT = 10
