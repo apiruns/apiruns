@@ -9,6 +9,16 @@ NOTE: Before executing the image it is necessary to have a [mongodb](https://www
 
 1. Create & Activate the virtual environment.
 
+Pip
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+or Poetry
+
 ```bash
 poetry install && poetry shell
 ```
