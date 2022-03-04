@@ -1,12 +1,17 @@
-from datetime import datetime
-from uuid import UUID, uuid4
 import ast
+from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, Field, validator
-from api.validators import validate
+from uuid import UUID
+from uuid import uuid4
+
 from fastapi import status
+from pydantic import BaseModel
+from pydantic import Field
+from pydantic import validator
+
+from api.configs import app_configs
 from api.utils.errors import custom_http_exception
-from api import configs
+from api.validators import validate
 
 
 class Node(BaseModel):
@@ -101,9 +106,9 @@ class Node(BaseModel):
                     "the path must only contain letters and the '/' character."
                 )
         path_modified = p[:-1] if p.endswith("/") else p
-        if len(path_modified.split("/")) > configs.PATH_SECTION:
+        if len(path_modified.split("/")) > app_configs.PATH_SECTION:
             raise ValueError(
-                f"Only one path with a maximum of {configs.PATH_SECTION - 1} "
+                f"Only one path with a maximum of {app_configs.PATH_SECTION - 1} "
                 "sections is allowed."
             )
         return p

@@ -1,7 +1,15 @@
-class RouterPath:
-    """Router paths constant"""
+import os
 
-    NODES = "/admin/nodes"
+
+class RouterAdmin:
+    """Router admin contants"""
+
+    ADMIN = os.environ.get("ROUTE_ADMIN", "/admin/models")
+
+
+class Router:
+    """Router constants"""
+
     LEVEL_ONE = "/{level_one}"
     LEVEL_TWO = "/{level_one}/{level_two}"
     LEVEL_THREE = "/{level_one}/{level_two}/{level_three}"
