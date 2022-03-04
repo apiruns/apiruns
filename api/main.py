@@ -18,15 +18,15 @@ def ping() -> models.Ping:
 
 
 # Admin model create
-@app.post(route_config.RouterAdmin.ADMIN, response_model=models.Node)
-async def create_model(body: models.Node):
+@app.post(route_config.RouterAdmin.ADMIN, response_model=models.Model)
+async def create_model(body: models.Model):
     """Create a model."""
     response = await service_node.create_node(body)
     return response
 
 
 # Admin model list
-@app.get(route_config.RouterAdmin.ADMIN, response_model=List[models.Node])
+@app.get(route_config.RouterAdmin.ADMIN, response_model=List[models.Model])
 async def list_models():
     """List models."""
     response = await service_node.list_nodes()

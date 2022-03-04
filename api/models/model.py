@@ -14,8 +14,8 @@ from api.utils.errors import custom_http_exception
 from api.validators import validate
 
 
-class Node(BaseModel):
-    """Validation when creating node.
+class Model(BaseModel):
+    """Validation when creating model.
 
     Args:
         BaseModel: BaseModel of pydantic.
@@ -33,7 +33,7 @@ class Node(BaseModel):
     created_at: Optional[datetime] = datetime.now()
 
     class Config:
-        """Config of class Node"""
+        """Config of class Model"""
 
         allow_population_by_field_name = True
         arbitrary_types_allowed = True
