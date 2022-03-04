@@ -7,7 +7,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from fastapi.responses import Response
 
-from api.constants import HTTPMethod
+from api.configs import validator_configs as vc
 from api.repositories import repository
 from api.utils.node import build_path_from_params
 from api.utils.node import paths_with_slash
@@ -34,16 +34,16 @@ class ServiceNodeMongo:
     @staticmethod
     async def from_method(method, body, *args):
         """Define the service to use according to the http method."""
-        if method == HTTPMethod.POST:
+        if method == vc.HTTPMethod.POST:
             response = await ServiceNodeMongo.post(body, args)
 
-        elif method == HTTPMethod.DELETE:
+        elif method == vc.HTTPMethod.DELETE:
             response = await ServiceNodeMongo.delete(args)
 
-        elif method == HTTPMethod.GET:
+        elif method == vc.HTTPMethod.GET:
             response = await ServiceNodeMongo.get(args)
 
-        elif method in [HTTPMethod.PUT, HTTPMethod.PATCH]:
+        elif method in [vc.HTTPMethod.PUT, vc.HTTPMethod.PATCH]:
             response = await ServiceNodeMongo.put(body, args)
         else:
             raise HTTPException(

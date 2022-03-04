@@ -1,9 +1,7 @@
+from api.configs import app_configs
 from api.validators.cerberus import CerberusValidator
-from api import configs
 
 
-VALIDATOR_TYPES = {
-    "CERBERUS": CerberusValidator
-}
+VALIDATOR_TYPES = {"CERBERUS": CerberusValidator}
 
-validate = VALIDATOR_TYPES[configs.VALIDATOR_NAME]
+validate = VALIDATOR_TYPES[app_configs.VALIDATOR_NAME]

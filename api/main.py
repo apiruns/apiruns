@@ -1,10 +1,10 @@
 from typing import List
 
-from app.api import models
 from fastapi import Body
 from fastapi import FastAPI
 from fastapi import Request
 
+from api import models
 from api.configs import route_config
 from api.services import service_node
 
@@ -34,8 +34,8 @@ async def list_models():
 
 
 # Path level one.
-@app.get(route_config.RouterPath.LEVEL_ONE)
-@app.post(route_config.RouterPath.LEVEL_ONE)
+@app.get(route_config.Router.LEVEL_ONE)
+@app.post(route_config.Router.LEVEL_ONE)
 async def dynamic_path_level_one(
     level_one: str,
     request: Request,
@@ -47,11 +47,11 @@ async def dynamic_path_level_one(
 
 
 # Path level two.
-@app.get(route_config.RouterPath.LEVEL_TWO)
-@app.put(route_config.RouterPath.LEVEL_TWO)
-@app.post(route_config.RouterPath.LEVEL_TWO)
-@app.patch(route_config.RouterPath.LEVEL_TWO)
-@app.delete(route_config.RouterPath.LEVEL_TWO)
+@app.get(route_config.Router.LEVEL_TWO)
+@app.put(route_config.Router.LEVEL_TWO)
+@app.post(route_config.Router.LEVEL_TWO)
+@app.patch(route_config.Router.LEVEL_TWO)
+@app.delete(route_config.Router.LEVEL_TWO)
 async def dynamic_path_level_two(
     level_one,
     level_two,
@@ -66,11 +66,11 @@ async def dynamic_path_level_two(
 
 
 # Path level three.
-@app.get(route_config.RouterPath.LEVEL_THREE)
-@app.put(route_config.RouterPath.LEVEL_THREE)
-@app.post(route_config.RouterPath.LEVEL_THREE)
-@app.patch(route_config.RouterPath.LEVEL_THREE)
-@app.delete(route_config.RouterPath.LEVEL_THREE)
+@app.get(route_config.Router.LEVEL_THREE)
+@app.put(route_config.Router.LEVEL_THREE)
+@app.post(route_config.Router.LEVEL_THREE)
+@app.patch(route_config.Router.LEVEL_THREE)
+@app.delete(route_config.Router.LEVEL_THREE)
 async def dynamic_path_level_three(
     level_one,
     level_two,
@@ -90,11 +90,11 @@ async def dynamic_path_level_three(
 
 
 # Path level four.
-@app.get(route_config.RouterPath.LEVEL_FOUR)
-@app.put(route_config.RouterPath.LEVEL_FOUR)
-@app.post(route_config.RouterPath.LEVEL_FOUR)
-@app.patch(route_config.RouterPath.LEVEL_FOUR)
-@app.delete(route_config.RouterPath.LEVEL_FOUR)
+@app.get(route_config.Router.LEVEL_FOUR)
+@app.put(route_config.Router.LEVEL_FOUR)
+@app.post(route_config.Router.LEVEL_FOUR)
+@app.patch(route_config.Router.LEVEL_FOUR)
+@app.delete(route_config.Router.LEVEL_FOUR)
 async def dynamic_path_level_four(
     level_one,
     level_two,
@@ -116,11 +116,11 @@ async def dynamic_path_level_four(
 
 
 # Path level five.
-@app.get(route_config.RouterPath.LEVEL_FIVE)
-@app.put(route_config.RouterPath.LEVEL_FIVE)
-@app.post(route_config.RouterPath.LEVEL_FIVE)
-@app.patch(route_config.RouterPath.LEVEL_FIVE)
-@app.delete(route_config.RouterPath.LEVEL_FIVE)
+@app.get(route_config.Router.LEVEL_FIVE)
+@app.put(route_config.Router.LEVEL_FIVE)
+@app.post(route_config.Router.LEVEL_FIVE)
+@app.patch(route_config.Router.LEVEL_FIVE)
+@app.delete(route_config.Router.LEVEL_FIVE)
 async def dynamic_path_level_five(
     level_one,
     level_two,
@@ -144,11 +144,11 @@ async def dynamic_path_level_five(
 
 
 # Path level six.
-@app.get(route_config.RouterPath.LEVEL_SIX)
-@app.put(route_config.RouterPath.LEVEL_SIX)
-@app.post(route_config.RouterPath.LEVEL_SIX)
-@app.patch(route_config.RouterPath.LEVEL_SIX)
-@app.delete(route_config.RouterPath.LEVEL_SIX)
+@app.get(route_config.Router.LEVEL_SIX)
+@app.put(route_config.Router.LEVEL_SIX)
+@app.post(route_config.Router.LEVEL_SIX)
+@app.patch(route_config.Router.LEVEL_SIX)
+@app.delete(route_config.Router.LEVEL_SIX)
 async def dynamic_path_level_six(
     level_one,
     level_two,
@@ -174,10 +174,10 @@ async def dynamic_path_level_six(
 
 
 # Path level seven.
-@app.get(route_config.RouterPath.LEVEL_SEVEN)
-@app.put(route_config.RouterPath.LEVEL_SEVEN)
-@app.patch(route_config.RouterPath.LEVEL_SEVEN)
-@app.delete(route_config.RouterPath.LEVEL_SEVEN)
+@app.get(route_config.Router.LEVEL_SEVEN)
+@app.put(route_config.Router.LEVEL_SEVEN)
+@app.patch(route_config.Router.LEVEL_SEVEN)
+@app.delete(route_config.Router.LEVEL_SEVEN)
 async def dynamic_path_level_seven(
     level_one,
     level_two,

@@ -1,5 +1,5 @@
+from api.configs import app_configs
 from api.engines import db
-from api import configs
 
 
 class MongoRepository:
@@ -21,7 +21,7 @@ class MongoRepository:
         return response
 
     @staticmethod
-    async def find(model, limit=configs.QUERY_LIMIT, params={}) -> dict:
+    async def find(model, limit=app_configs.QUERY_LIMIT, params={}) -> dict:
         """Find documents in mongo.
 
         Args:
