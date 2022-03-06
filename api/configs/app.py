@@ -11,3 +11,6 @@ VALIDATOR_NAME = "CERBERUS"
 
 QUERY_LIMIT = 10
 PATH_SECTION = 7
+
+# Models
+MODEL_ADMIN_NAME = "apisrun_models"

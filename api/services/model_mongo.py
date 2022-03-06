@@ -7,65 +7,72 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from fastapi.responses import Response
 
-from api.configs import validator_configs as vc
+from api.configs import app_configs
+from api.configs import route_config as rt
 from api.repositories import repository
 from api.utils.node import build_path_from_params
 from api.utils.node import paths_with_slash
 from api.validators import validate
 
 
-class ServiceNodeMongo:
-    """Service Node for mongo."""
+class ServiceModelMongo:
+    """Service Model for mongo."""
 
     @staticmethod
-    async def create_node(body: Body):
-        """Create an node document in mongo"""
-        await validate.node(body.model_name, body.path)
+    async def create_model(body: Body):
+        """Create a model document in mongo"""
+        await validate.model(body.model_name, body.path)
         payload = jsonable_encoder(body)
-        response = await repository.create_one(payload, "nodes")
+        response = await repository.create_one(
+            payload,
+            app_configs.MODEL_ADMIN_NAME,
+        )
         return JSONResponse(status_code=status.HTTP_201_CREATED, content=response)
 
     @staticmethod
-    async def list_nodes():
-        """List node documents in mongo"""
-        nodes = await repository.find(model="nodes", params={"is_active": True})
+    async def list_models():
+        """List models documents in mongo"""
+        nodes = await repository.find(
+            model=app_configs.MODEL_ADMIN_NAME,
+            params={"is_active": True},
+        )
         return nodes
 
     @staticmethod
-    async def from_method(method, body, *args):
+    async def get_service_method(method, body, *args):
         """Define the service to use according to the http method."""
-        if method == vc.HTTPMethod.POST:
-            response = await ServiceNodeMongo.post(body, args)
-
-        elif method == vc.HTTPMethod.DELETE:
-            response = await ServiceNodeMongo.delete(args)
-
-        elif method == vc.HTTPMethod.GET:
-            response = await ServiceNodeMongo.get(args)
-
-        elif method in [vc.HTTPMethod.PUT, vc.HTTPMethod.PATCH]:
-            response = await ServiceNodeMongo.put(body, args)
-        else:
+        repositories = {
+            rt.HTTPMethod.POST: ServiceModelMongo.post,
+            rt.HTTPMethod.GET: ServiceModelMongo.get,
+            rt.HTTPMethod.PUT: ServiceModelMongo.put,
+            rt.HTTPMethod.PATCH: ServiceModelMongo.put,
+            rt.HTTPMethod.DELETE: ServiceModelMongo.delete,
+        }
+        service = repositories.get(method)
+        if not service:
             raise HTTPException(
                 status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
                 detail="Method Not Allowed",
             )
+
+        response = await service(body, args)
         return response
 
     @staticmethod
-    async def get(args):
-        """Is the method get for dynamic node"""
+    async def get(body, args):
+        """Get method return an object from model."""
         original_path, modified_path, _id = build_path_from_params(args)
-        nodes = await repository.find(
-            model="nodes", params={"path": {"$in": paths_with_slash(modified_path)}}
+        models = await repository.find(
+            model=app_configs.MODEL_ADMIN_NAME,
+            params={"path": {"$in": paths_with_slash(modified_path)}},
         )
-        if nodes:
-            node = nodes[0]
+        if models:
+            model = models[0]
             if not _id:
-                response = await repository.find(node["model"])
+                response = await repository.find(model["model"])
                 return response
 
-            response = await repository.find_one(node["model"], {"reference_id": _id})
+            response = await repository.find_one(model["model"], {"reference_id": _id})
             if response:
                 return response
 
@@ -76,7 +83,7 @@ class ServiceNodeMongo:
 
     @staticmethod
     async def post(body, args):
-        """Is the method post for dynamic node"""
+        """Post method create a new object."""
         original_path, modified_path, _id = build_path_from_params(args)
         if _id:
             raise HTTPException(
@@ -84,20 +91,21 @@ class ServiceNodeMongo:
                 detail=f"Resource `{original_path}` not found !",
             )
 
-        nodes = await repository.find(
-            model="nodes", params={"path": {"$in": paths_with_slash(modified_path)}}
+        models = await repository.find(
+            model=app_configs.MODEL_ADMIN_NAME,
+            params={"path": {"$in": paths_with_slash(modified_path)}},
         )
-        if nodes:
-            node = nodes[0]
+        if models:
+            model = models[0]
             payload = jsonable_encoder(body)
-            errors = validate.payload(node["schema"], payload)
+            errors = validate.payload(model["schema"], payload)
             if errors:
                 return JSONResponse(
                     status_code=status.HTTP_400_BAD_REQUEST, content=errors
                 )
             else:
                 payload["reference_id"] = str(uuid.uuid4())
-                document = await repository.create_one(payload, node["model"])
+                document = await repository.create_one(payload, model["model"])
                 return JSONResponse(
                     status_code=status.HTTP_201_CREATED, content=document
                 )
@@ -109,22 +117,23 @@ class ServiceNodeMongo:
 
     @staticmethod
     async def put(body, args):
-        """Is the method put for dynamic node"""
+        """Put method can modify the object."""
         original_path, modified_path, _id = build_path_from_params(args)
-        nodes = await repository.find(
-            model="nodes", params={"path": {"$in": paths_with_slash(modified_path)}}
+        models = await repository.find(
+            model=app_configs.MODEL_ADMIN_NAME,
+            params={"path": {"$in": paths_with_slash(modified_path)}},
         )
-        if nodes:
-            node = nodes[0]
+        if models:
+            model = models[0]
             payload = jsonable_encoder(body)
-            errors = validate.payload(node["schema"], payload)
+            errors = validate.payload(model["schema"], payload)
             if errors:
                 return JSONResponse(
                     status_code=status.HTTP_400_BAD_REQUEST, content=errors
                 )
             else:
                 await repository.update_one(
-                    node["model"], {"reference_id": _id}, {"$set": payload}
+                    model["model"], {"reference_id": _id}, {"$set": payload}
                 )
                 return Response(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -134,15 +143,16 @@ class ServiceNodeMongo:
         )
 
     @staticmethod
-    async def delete(args):
-        """Is the method delete for dynamic node"""
+    async def delete(body, args):
+        """Delete method can delete an object."""
         original_path, modified_path, _id = build_path_from_params(args)
-        nodes = await repository.find(
-            model="nodes", params={"path": {"$in": paths_with_slash(modified_path)}}
+        models = await repository.find(
+            model=app_configs.MODEL_ADMIN_NAME,
+            params={"path": {"$in": paths_with_slash(modified_path)}},
         )
-        if nodes:
-            node = nodes[0]
-            await repository.delete_one(node["model"], {"reference_id": _id})
+        if models:
+            model = models[0]
+            await repository.delete_one(model["model"], {"reference_id": _id})
             return Response(status_code=status.HTTP_204_NO_CONTENT)
 
         raise HTTPException(

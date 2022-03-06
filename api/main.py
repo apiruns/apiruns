@@ -6,7 +6,7 @@ from fastapi import Request
 
 from api import models
 from api.configs import route_config
-from api.services import service_node
+from api.services import service_model
 
 app = FastAPI()
 
@@ -21,7 +21,7 @@ def ping() -> models.Ping:
 @app.post(route_config.RouterAdmin.ADMIN, response_model=models.Model)
 async def create_model(body: models.Model):
     """Create a model."""
-    response = await service_node.create_node(body)
+    response = await service_model.create_model(body)
     return response
 
 
@@ -29,7 +29,7 @@ async def create_model(body: models.Model):
 @app.get(route_config.RouterAdmin.ADMIN, response_model=List[models.Model])
 async def list_models():
     """List models."""
-    response = await service_node.list_nodes()
+    response = await service_model.list_models()
     return response
 
 
@@ -42,7 +42,7 @@ async def dynamic_path_level_one(
     body: dict = Body(...),
 ):
     """Dynamic path level one."""
-    response = await service_node.from_method(request.method, body, level_one)
+    response = await service_model.get_service_method(request.method, body, level_one)
     return response
 
 
@@ -59,7 +59,7 @@ async def dynamic_path_level_two(
     body: dict = Body(...),
 ):
     """Dynamic path level two."""
-    response = await service_node.from_method(
+    response = await service_model.get_service_method(
         request.method, body, level_one, level_two
     )
     return response
@@ -79,7 +79,7 @@ async def dynamic_path_level_three(
     body: dict = Body(...),
 ):
     """Dynamic path level three."""
-    response = await service_node.from_method(
+    response = await service_model.get_service_method(
         request.method,
         body,
         level_one,
@@ -104,7 +104,7 @@ async def dynamic_path_level_four(
     body: dict = Body(...),
 ):
     """Dynamic path level four."""
-    response = await service_node.from_method(
+    response = await service_model.get_service_method(
         request.method,
         body,
         level_one,
@@ -131,7 +131,7 @@ async def dynamic_path_level_five(
     body: dict = Body(...),
 ):
     """Dynamic path level five."""
-    response = await service_node.from_method(
+    response = await service_model.get_service_method(
         request.method,
         body,
         level_one,
@@ -160,7 +160,7 @@ async def dynamic_path_level_six(
     body: dict = Body(...),
 ):
     """Dynamic path level six."""
-    response = await service_node.from_method(
+    response = await service_model.get_service_method(
         request.method,
         body,
         level_one,
@@ -190,7 +190,7 @@ async def dynamic_path_level_seven(
     body: dict = Body(...),
 ):
     """Dynamic path level seven."""
-    response = await service_node.from_method(
+    response = await service_model.get_service_method(
         request.method,
         body,
         level_one,

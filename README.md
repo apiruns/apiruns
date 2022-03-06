@@ -42,7 +42,7 @@ This command exposes the resource on the port `:8000`.
 
 Available resources:
 * API Health `GET http://localhost:8000/ping/`
-* Administration `GET|POST http://localhost:8000/admin/nodes/`
+* Administration `GET|POST http://localhost:8000/admin/models/`
 
 
 ## How to use this api.
@@ -51,7 +51,7 @@ Available resources:
 
 To create a new resource we just send a post to the following url:
 
-POST `http://localhost:8000/admin/nodes/`
+POST `http://localhost:8000/admin/models/`
 
 *Request*
 ```json

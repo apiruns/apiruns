@@ -1,4 +1,6 @@
 from fastapi import status
+
+from api.configs import app_configs
 from api.repositories import repository
 from api.utils.errors import custom_http_exception
 from api.utils.node import paths_with_slash
@@ -8,9 +10,9 @@ class ValidatorMixin:
     """Mixin base validator"""
 
     @staticmethod
-    async def node(model, path) -> None:
-        """Validate node params."""
-        result = await repository.count("nodes", {"model": model})
+    async def model(model, path) -> None:
+        """Validate model params."""
+        result = await repository.count(app_configs.MODEL_ADMIN_NAME, {"model": model})
         if result:
             raise custom_http_exception(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -21,7 +23,8 @@ class ValidatorMixin:
             )
 
         result = await repository.count(
-            "nodes", {"path": {"$in": paths_with_slash(path)}}
+            app_configs.MODEL_ADMIN_NAME,
+            {"path": {"$in": paths_with_slash(path)}},
         )
         if result:
             raise custom_http_exception(
