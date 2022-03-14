@@ -1,6 +1,5 @@
 import uuid
 
-from fastapi import Body
 from fastapi import HTTPException
 from fastapi import status
 from fastapi.encoders import jsonable_encoder
@@ -19,12 +18,36 @@ class ServiceModelMongo:
     """Service Model for mongo."""
 
     @staticmethod
-    async def create_model(body: Body):
+    async def create_model(body: dict):
         """Create a model document in mongo"""
-        await validate.model(body.model_name, body.path)
-        payload = jsonable_encoder(body)
+        errors, body = validate.admin_model(body=body)
+        if errors:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST, content={"error": errors}
+            )
+
+        exist_model = await repository.count(
+            app_configs.MODEL_ADMIN_NAME, {"model": body.get("model")}
+        )
+        if exist_model:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"error": "the model already exists."},
+            )
+
+        exist_path = await repository.count(
+            app_configs.MODEL_ADMIN_NAME,
+            {"path": {"$in": paths_with_slash(body.get("path"))}},
+        )
+        if exist_path:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"error": "the path already exists."},
+            )
+        # TODO: This validation can be one query
+
         response = await repository.create_one(
-            payload,
+            body,
             app_configs.MODEL_ADMIN_NAME,
         )
         return JSONResponse(status_code=status.HTTP_201_CREATED, content=response)
@@ -98,7 +121,7 @@ class ServiceModelMongo:
         if models:
             model = models[0]
             payload = jsonable_encoder(body)
-            errors = validate.payload(model["schema"], payload)
+            errors = validate.data_is_valid(model["schema"], payload)
             if errors:
                 return JSONResponse(
                     status_code=status.HTTP_400_BAD_REQUEST, content=errors
@@ -126,7 +149,7 @@ class ServiceModelMongo:
         if models:
             model = models[0]
             payload = jsonable_encoder(body)
-            errors = validate.payload(model["schema"], payload)
+            errors = validate.data_is_valid(model["schema"], payload)
             if errors:
                 return JSONResponse(
                     status_code=status.HTTP_400_BAD_REQUEST, content=errors

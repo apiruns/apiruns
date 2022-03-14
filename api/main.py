@@ -12,16 +12,16 @@ app = FastAPI()
 
 
 @app.get("/ping")
-def ping() -> models.Ping:
+def ping() -> dict:
     """Ping api."""
-    return models.Ping(pong="OK")
+    return {}
 
 
 # Admin model create
 @app.post(route_config.RouterAdmin.ADMIN, response_model=models.Model)
-async def create_model(body: models.Model):
+async def create_model(request: Request):
     """Create a model."""
-    response = await service_model.create_model(body)
+    response = await service_model.create_model(await request.json())
     return response
 
 
