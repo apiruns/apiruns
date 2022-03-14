@@ -20,17 +20,17 @@ class Cerberus:
     """Cerberus Validator, contains validation methods."""
 
     @staticmethod
-    def schema_is_valid(data) -> dict:
+    def schema_is_valid(schema) -> dict:
         """Validate if the schema is valid in cerberus.
 
         Args:
-            data (dict): cerberus shema.
+            data (dict): cerberus schema.
 
         Returns:
             dict: empty if was OK or errors if fail.
         """
         try:
-            Validator(data)
+            Validator(schema)
             return {}
         except SchemaError as e:
             return e.args[0]
