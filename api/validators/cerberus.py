@@ -2,18 +2,35 @@ from typing import Tuple
 
 from cerberus import Validator
 from cerberus.schema import SchemaError
+from dacite import from_dict
 
 from api.configs import validator_configs
-from api.validators.common import AdminSerializerSchema
+from api.datastructures import Model
 
 
 ADMIN_SCHEMA = {
-    "path": {"type": "string", "required": True},
-    "schema": {"type": "dict", "required": True},
-    "model": {"type": "string", "required": True},
+    "path": {
+        "type": "string",
+        "required": True,
+        "empty": False,
+        "minlength": 1,
+        "regex": "^/[a-z0-9]+(?:/[a-z0-9]+|/)*$",
+    },
+    "model": {
+        "type": "string",
+        "required": True,
+        "empty": False,
+        "maxlength": 70,
+        "regex": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+    },
+    "schema": {
+        "type": "dict",
+        "required": True,
+        "empty": False,
+        "minlength": 1,
+        "maxlength": 2,
+    },
 }
-
-admin_serializer = AdminSerializerSchema()
 
 
 class Cerberus:
@@ -67,7 +84,6 @@ class Cerberus:
         if error:
             return error, body
 
-        errors, body = admin_serializer.serialize(body)
-        if errors:
-            return errors, body
-        return Cerberus.schema_is_valid(body.get("schema")), body
+        model = from_dict(data_class=Model, data=body)
+
+        return Cerberus.schema_is_valid(model.schema), model.to_json()

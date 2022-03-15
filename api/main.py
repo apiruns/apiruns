@@ -1,10 +1,7 @@
-from typing import List
-
 from fastapi import Body
 from fastapi import FastAPI
 from fastapi import Request
 
-from api import models
 from api.configs import route_config
 from api.services import service_model
 
@@ -18,7 +15,7 @@ def ping() -> dict:
 
 
 # Admin model create
-@app.post(route_config.RouterAdmin.ADMIN, response_model=models.Model)
+@app.post(route_config.RouterAdmin.ADMIN)
 async def create_model(request: Request):
     """Create a model."""
     response = await service_model.create_model(await request.json())
@@ -26,7 +23,7 @@ async def create_model(request: Request):
 
 
 # Admin model list
-@app.get(route_config.RouterAdmin.ADMIN, response_model=List[models.Model])
+@app.get(route_config.RouterAdmin.ADMIN)
 async def list_models():
     """List models."""
     response = await service_model.list_models()

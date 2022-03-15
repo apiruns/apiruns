@@ -127,7 +127,7 @@ class ServiceModelMongo:
                     status_code=status.HTTP_400_BAD_REQUEST, content=errors
                 )
             else:
-                payload["reference_id"] = str(uuid.uuid4())
+                payload[app_configs.IDENTIFIER_ID] = str(uuid.uuid4())
                 document = await repository.create_one(payload, model["model"])
                 return JSONResponse(
                     status_code=status.HTTP_201_CREATED, content=document

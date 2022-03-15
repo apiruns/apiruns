@@ -33,7 +33,7 @@ class AdminSerializerSchema:
         """
         new_body = {}
         errors = []
-        new_body["public_id"] = str(uuid.uuid4())
+        new_body[app_configs.IDENTIFIER_ID] = str(uuid.uuid4())
         for key, method in self.methods.items():
             error, value = method(body.get(key))
             if error:
@@ -70,27 +70,26 @@ class AdminSerializerSchema:
             Tuple[dict, Any]: errors and path serialized.
         """
         error = {}
-        v = value.strip().lower()
-        if not v.startswith("/"):
+        if not value.startswith("/"):
             error["path"] = "the path must start with the '/' character."
-            return error, v
+            return error, value
 
-        if v == "/":
-            return {}, v
+        if value == "/":
+            return {}, value
 
         # TODO: validate with path regex
-        rf = filter(lambda x: not (x.isalpha() or x == ""), v.split("/"))
+        rf = filter(lambda x: not (x.isalpha() or x == ""), value.split("/"))
         if len(list(rf)):
             error["path"] = "the path must only contain letters and the '/' character."
-            return error, v
+            return error, value
 
-        path_modified = v[:-1] if v.endswith("/") else v
+        path_modified = value[:-1] if value.endswith("/") else value
         if len(path_modified.split("/")) > app_configs.PATH_SECTION:
             error["path"] = (
                 f"Only one path with a maximum of {app_configs.PATH_SECTION - 1} "
                 "sections is allowed."
             )
-        return error, v
+        return error, value
 
     def serialize_model(self, value) -> Tuple[dict, Any]:
         """Serialize and validate path field.
@@ -102,7 +101,30 @@ class AdminSerializerSchema:
             Tuple[dict, Any]: errors and model name serialized.
         """
         error = {"model": "the model only allows letters without spaces."}
-        v = value.strip().lower()
-        if not v.isalpha():
-            return error, v
-        return {}, v
+        if not value.isalpha():
+            return error, value
+        return {}, value
+
+
+def string_isalpha(field, value, error):
+    if not value.isalpha():
+        error(field, "the model only allows letters without spaces.")
+
+
+def is_path_valid(field, value, error):
+    if not value.startswith("/"):
+        error(field, "the path must start with the '/' character.")
+
+    rf = filter(lambda x: not (x.isalpha() or x == ""), value.split("/"))
+    if len(list(rf)):
+        error(field, "the path must only contain letters and the '/' character.")
+
+    path_modified = value[:-1] if value.endswith("/") else value
+    if len(path_modified.split("/")) > app_configs.PATH_SECTION:
+        error(
+            field,
+            (
+                f"Only one path with a maximum of {app_configs.PATH_SECTION - 1} "
+                "sections is allowed."
+            ),
+        )

@@ -14,3 +14,4 @@ PATH_SECTION = 7
 
 # Models
 MODEL_ADMIN_NAME = "apisrun_models"
+IDENTIFIER_ID = "public_id"
