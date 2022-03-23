@@ -26,19 +26,14 @@ class ServiceModelMongo:
                 status_code=status.HTTP_400_BAD_REQUEST, content={"error": errors}
             )
 
-        exist_model = await repository.count(
-            app_configs.MODEL_ADMIN_NAME, {"model": body.get("model")}
-        )
+        exist_model = await repository.exist_model(body.get("model"))
         if exist_model:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content={"error": "the model already exists."},
             )
 
-        exist_path = await repository.count(
-            app_configs.MODEL_ADMIN_NAME,
-            {"path": {"$in": paths_with_slash(body.get("path"))}},
-        )
+        exist_path = await repository.exist_path(paths_with_slash(body.get("path")))
         if exist_path:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -46,20 +41,14 @@ class ServiceModelMongo:
             )
         # TODO: This validation can be one query
 
-        response = await repository.create_one(
-            body,
-            app_configs.MODEL_ADMIN_NAME,
-        )
+        response = await repository.create_admin_model(body)
         return JSONResponse(status_code=status.HTTP_201_CREATED, content=response)
 
     @staticmethod
     async def list_models():
         """List models documents in mongo"""
-        nodes = await repository.find(
-            model=app_configs.MODEL_ADMIN_NAME,
-            params={"is_active": True},
-        )
-        return nodes
+        models = await repository.list_admin_model()
+        return models
 
     @staticmethod
     async def get_service_method(method, body, *args):
@@ -85,18 +74,10 @@ class ServiceModelMongo:
     async def get(body, args):
         """Get method return an object from model."""
         original_path, modified_path, _id = build_path_from_params(args)
-        models = await repository.find(
-            model=app_configs.MODEL_ADMIN_NAME,
-            params={"path": {"$in": paths_with_slash(modified_path)}},
-        )
-        if models:
-            model = models[0]
-            if not _id:
-                response = await repository.find(model["model"])
-                return response
-
-            response = await repository.find_one(model["model"], {"reference_id": _id})
-            if response:
+        model = await repository.model_by_path(paths_with_slash(modified_path))
+        if model:
+            response = await repository.find_one_or_many(model["model"], _id)
+            if response is not None:
                 return response
 
         raise HTTPException(
@@ -114,12 +95,8 @@ class ServiceModelMongo:
                 detail=f"Resource `{original_path}` not found !",
             )
 
-        models = await repository.find(
-            model=app_configs.MODEL_ADMIN_NAME,
-            params={"path": {"$in": paths_with_slash(modified_path)}},
-        )
-        if models:
-            model = models[0]
+        model = await repository.model_by_path(paths_with_slash(modified_path))
+        if model:
             payload = jsonable_encoder(body)
             errors = validate.data_is_valid(model["schema"], payload)
             if errors:
@@ -142,12 +119,8 @@ class ServiceModelMongo:
     async def put(body, args):
         """Put method can modify the object."""
         original_path, modified_path, _id = build_path_from_params(args)
-        models = await repository.find(
-            model=app_configs.MODEL_ADMIN_NAME,
-            params={"path": {"$in": paths_with_slash(modified_path)}},
-        )
-        if models:
-            model = models[0]
+        model = await repository.model_by_path(paths_with_slash(modified_path))
+        if model:
             payload = jsonable_encoder(body)
             errors = validate.data_is_valid(model["schema"], payload)
             if errors:
@@ -155,9 +128,7 @@ class ServiceModelMongo:
                     status_code=status.HTTP_400_BAD_REQUEST, content=errors
                 )
             else:
-                await repository.update_one(
-                    model["model"], {"reference_id": _id}, {"$set": payload}
-                )
+                await repository.update_one(model["model"], _id, payload)
                 return Response(status_code=status.HTTP_204_NO_CONTENT)
 
         raise HTTPException(
@@ -169,13 +140,9 @@ class ServiceModelMongo:
     async def delete(body, args):
         """Delete method can delete an object."""
         original_path, modified_path, _id = build_path_from_params(args)
-        models = await repository.find(
-            model=app_configs.MODEL_ADMIN_NAME,
-            params={"path": {"$in": paths_with_slash(modified_path)}},
-        )
-        if models:
-            model = models[0]
-            await repository.delete_one(model["model"], {"reference_id": _id})
+        model = await repository.model_by_path(paths_with_slash(modified_path))
+        if model:
+            await repository.delete_one(model["model"], _id)
             return Response(status_code=status.HTTP_204_NO_CONTENT)
 
         raise HTTPException(

@@ -15,8 +15,8 @@ class BaseModel:
 
     public_id: str = str(uuid.uuid4())
     created_at: datetime = datetime.now(timezone.utc)
-    updated_at: datetime = datetime.now(timezone.utc)
-    deleted_at: datetime = datetime.now(timezone.utc)
+    updated_at: datetime = None
+    deleted_at: datetime = None
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -29,6 +29,8 @@ class BaseModel:
 
 @dataclass
 class Model(BaseModel):
+    """Admin Model"""
+
     path: str = "/"
     model: str = f"model_{str(uuid.uuid4())}"
     schema: dict = field(default_factory=dict)

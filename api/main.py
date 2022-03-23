@@ -36,7 +36,7 @@ async def list_models():
 async def dynamic_path_level_one(
     level_one: str,
     request: Request,
-    body: dict = Body(...),
+    body: dict = Body(default={}),
 ):
     """Dynamic path level one."""
     response = await service_model.get_service_method(request.method, body, level_one)
@@ -53,7 +53,7 @@ async def dynamic_path_level_two(
     level_one,
     level_two,
     request: Request,
-    body: dict = Body(...),
+    body: dict = Body(default={}),
 ):
     """Dynamic path level two."""
     response = await service_model.get_service_method(
@@ -73,7 +73,7 @@ async def dynamic_path_level_three(
     level_two,
     level_three,
     request: Request,
-    body: dict = Body(...),
+    body: dict = Body(default={}),
 ):
     """Dynamic path level three."""
     response = await service_model.get_service_method(
@@ -98,7 +98,7 @@ async def dynamic_path_level_four(
     level_three,
     level_four,
     request: Request,
-    body: dict = Body(...),
+    body: dict = Body(default={}),
 ):
     """Dynamic path level four."""
     response = await service_model.get_service_method(
@@ -125,7 +125,7 @@ async def dynamic_path_level_five(
     level_four,
     level_five,
     request: Request,
-    body: dict = Body(...),
+    body: dict = Body(default={}),
 ):
     """Dynamic path level five."""
     response = await service_model.get_service_method(
@@ -154,7 +154,7 @@ async def dynamic_path_level_six(
     level_five,
     level_six,
     request: Request,
-    body: dict = Body(...),
+    body: dict = Body(default={}),
 ):
     """Dynamic path level six."""
     response = await service_model.get_service_method(
@@ -184,7 +184,7 @@ async def dynamic_path_level_seven(
     level_six,
     level_seven,
     request: Request,
-    body: dict = Body(...),
+    body: dict = Body(default={}),
 ):
     """Dynamic path level seven."""
     response = await service_model.get_service_method(

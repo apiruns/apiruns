@@ -1,5 +1,12 @@
+from typing import List
+from typing import Union
+
 from api.configs import app_configs
 from api.engines import db
+
+
+ADMIN_MODEL = app_configs.MODEL_ADMIN_NAME
+ID_FIELD = app_configs.IDENTIFIER_ID
 
 
 class MongoRepository:
@@ -50,7 +57,7 @@ class MongoRepository:
         return response
 
     @staticmethod
-    async def find_one(model, params) -> dict:
+    async def find_one(model, params={}) -> dict:
         """Get one document in mongo.
 
         Args:
@@ -64,29 +71,111 @@ class MongoRepository:
         return response
 
     @staticmethod
-    async def update_one(model, params, data) -> int:
+    async def update_one(model: str, _id: str, data: dict) -> int:
         """Update one document in mongo.
 
         Args:
             model (str): Collection name.
+            _id (str): Reference id.
             params (dict): Filters.
 
         Returns:
             int: Document modified count.
         """
-        response = await db[model].update_one(params, data)
+        response = await db[model].update_one({ID_FIELD: _id}, {"$set": data})
         return response.modified_count
 
     @staticmethod
-    async def delete_one(model, params) -> int:
+    async def delete_one(model, _id) -> int:
         """Delete one document in mongo.
 
         Args:
             model (str): Collection name.
-            params (dict): Filters.
+            _id (str): Reference id.
 
         Returns:
             int: Document deleted count.
         """
-        response = await db[model].delete_one(params)
+        response = await db[model].delete_one({ID_FIELD: _id})
         return response.deleted_count
+
+    @staticmethod
+    async def exist_model(name: str) -> bool:
+        """Validate existence of a model in admin model.
+
+        Args:
+            name (str): model name.
+
+        Returns:
+            bool: exist model.
+        """
+        rows = await db[ADMIN_MODEL].count_documents({"model": name})
+        return rows > 0
+
+    @staticmethod
+    async def exist_path(path: str) -> bool:
+        """Validate existence of the path in admin model.
+
+        Args:
+            path (str): path url.
+
+        Returns:
+            bool: exist path.
+        """
+        rows = await db[ADMIN_MODEL].count_documents({"path": {"$in": path}})
+        return rows > 0
+
+    @staticmethod
+    async def create_admin_model(body: dict) -> dict:
+        """Create a admin model.
+
+        Args:
+            body (dict): body of admin model.
+
+        Returns:
+            dict: model admin.
+        """
+        obj = await db[ADMIN_MODEL].insert_one(body)
+        row = await db[ADMIN_MODEL].find_one({"_id": obj.inserted_id}, {"_id": 0})
+        return row
+
+    @staticmethod
+    async def list_admin_model() -> List[dict]:
+        """List admin models
+
+        Returns:
+            List[dict]: List admin models.
+        """
+        rows = await db[ADMIN_MODEL].find({"is_deleted": None}, {"_id": 0}).to_list(100)
+        return rows
+
+    @staticmethod
+    async def model_by_path(path: str) -> dict:
+        """Look for admin model by path url.
+
+        Args:
+            path (str): path url.
+
+        Returns:
+            dict: admin model
+        """
+        row = await db[ADMIN_MODEL].find_one({"path": {"$in": path}}, {"_id": 0})
+        return row
+
+    @staticmethod
+    async def find_one_or_many(model, _id) -> Union[dict, List[dict]]:
+        """Get one or many documents.
+
+        Args:
+            model (str): Collection name.
+            _id (str): reference id.
+
+        Returns:
+            Union[dict,List[dict]]: Documents found.
+        """
+        if _id:
+            response = await db[model].find_one({ID_FIELD: _id}, {"_id": 0})
+            return response
+
+        response = await MongoRepository.find(model)
+        return response
