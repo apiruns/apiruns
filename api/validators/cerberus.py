@@ -14,7 +14,7 @@ ADMIN_SCHEMA = {
         "required": True,
         "empty": False,
         "minlength": 1,
-        "regex": "^/[a-z0-9]+(?:/[a-z0-9]+|/)*$",
+        "regex": "^/|/[a-z0-9]+(?:/[a-z0-9]+|/)*$",
     },
     "model": {
         "type": "string",

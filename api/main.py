@@ -11,7 +11,7 @@ app = FastAPI()
 @app.get("/ping")
 def ping() -> dict:
     """Ping api."""
-    return {}
+    return {"pong": "OK"}
 
 
 # Admin model create
@@ -27,6 +27,18 @@ async def create_model(request: Request):
 async def list_models():
     """List models."""
     response = await service_model.list_models()
+    return response
+
+
+# Path root.
+@app.get(route_config.Router.LEVEL_ROOT)
+@app.post(route_config.Router.LEVEL_ROOT)
+async def dynamic_path_level_root(
+    request: Request,
+    body: dict = Body(default={}),
+):
+    """Dynamic path level one."""
+    response = await service_model.get_service_method(request.method, body)
     return response
 
 

@@ -19,6 +19,9 @@ def build_path_from_params(params: tuple) -> Tuple[str, str, Any]:
     Returns:
         (str, str, str): Return origin path, path modified and uuid.
     """
+    if not params:
+        return "/", "/", None
+
     if is_uuid_valid(params[-1]):
         _id = params[-1]
         original = f"/{'/'.join(params)}"

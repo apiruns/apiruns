@@ -10,6 +10,7 @@ class RouterAdmin:
 class Router:
     """Router constants"""
 
+    LEVEL_ROOT = "/"
     LEVEL_ONE = "/{level_one}"
     LEVEL_TWO = "/{level_one}/{level_two}"
     LEVEL_THREE = "/{level_one}/{level_two}/{level_three}"
