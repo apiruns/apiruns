@@ -86,7 +86,10 @@ POST `http://localhost:8000/admin/models/`
 
 ```json
 {
-    "reference_id": "bf069dc7-db7f-4639-a47f-16fb6748fd4d",
+    "public_id": "c056e69e-b0e0-4fcb-a946-85f6c9f6caed",
+    "created_at": "2022-03-23T00:09:45.708193+00:00",
+    "updated_at": null,
+    "deleted_at": null,
     "path": "/users/",
     "schema": {
         "username": {
@@ -104,8 +107,6 @@ POST `http://localhost:8000/admin/models/`
         }
     },
     "model": "users",
-    "is_active": true,
-    "created_at": "2021-09-08T19:38:25.826517"
 }
 ```
 
