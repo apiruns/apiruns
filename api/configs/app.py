@@ -9,5 +9,9 @@ ENGINE_URI = os.environ.get("ENGINE_URI", ENGINE_URI_DEFAULT)
 # Validator configs
 VALIDATOR_NAME = "CERBERUS"
 
-QUERY_LIMIT = 10
+QUERY_LIMIT = 50
 PATH_SECTION = 7
+
+# Models
+MODEL_ADMIN_NAME = "apisrun_models"
+IDENTIFIER_ID = "public_id"

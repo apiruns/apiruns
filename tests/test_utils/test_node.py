@@ -28,3 +28,11 @@ def test_paths_without_slash():
     path = "/users/"
     result = paths_with_slash(path)
     assert result == ["/users/", "/users"]
+
+
+def test_build_path_without_params():
+    params_with_uuid = ()
+    url_original, url_modified, _uuid = build_path_from_params(params_with_uuid)
+    assert url_original == "/"
+    assert url_modified == "/"
+    assert _uuid == None

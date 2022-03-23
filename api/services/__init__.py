@@ -1,8 +1,8 @@
-from api import configs
-from api.services.node_mongo import ServiceNodeMongo
+from api.configs import app_configs
+from api.services.model_mongo import ServiceModelMongo
 
-ENGINE_TYPES = {"MONGO": ServiceNodeMongo}
+ENGINE_TYPES = {"MONGO": ServiceModelMongo}
 
-service_node = ENGINE_TYPES[configs.ENGINE_NAME]
+service_model = ENGINE_TYPES[app_configs.ENGINE_NAME.upper()]
 
-__all__ = ("service_node",)
+__all__ = ("service_model",)

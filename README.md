@@ -9,6 +9,16 @@ NOTE: Before executing the image it is necessary to have a [mongodb](https://www
 
 1. Create & Activate the virtual environment.
 
+Pip
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+or Poetry
+
 ```bash
 poetry install && poetry shell
 ```
@@ -32,7 +42,7 @@ This command exposes the resource on the port `:8000`.
 
 Available resources:
 * API Health `GET http://localhost:8000/ping/`
-* Administration `GET|POST http://localhost:8000/admin/nodes/`
+* Administration `GET|POST http://localhost:8000/admin/models/`
 
 
 ## How to use this api.
@@ -41,7 +51,7 @@ Available resources:
 
 To create a new resource we just send a post to the following url:
 
-POST `http://localhost:8000/admin/nodes/`
+POST `http://localhost:8000/admin/models/`
 
 *Request*
 ```json
@@ -76,7 +86,10 @@ POST `http://localhost:8000/admin/nodes/`
 
 ```json
 {
-    "reference_id": "bf069dc7-db7f-4639-a47f-16fb6748fd4d",
+    "public_id": "c056e69e-b0e0-4fcb-a946-85f6c9f6caed",
+    "created_at": "2022-03-23T00:09:45.708193+00:00",
+    "updated_at": null,
+    "deleted_at": null,
     "path": "/users/",
     "schema": {
         "username": {
@@ -94,8 +107,6 @@ POST `http://localhost:8000/admin/nodes/`
         }
     },
     "model": "users",
-    "is_active": true,
-    "created_at": "2021-09-08T19:38:25.826517"
 }
 ```
 

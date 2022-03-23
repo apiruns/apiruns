@@ -1,84 +1,94 @@
-from typing import List
-
-from app.api import models
 from fastapi import Body
 from fastapi import FastAPI
 from fastapi import Request
 
-from api.constants import RouterPath
-from api.services import service_node
+from api.configs import route_config
+from api.services import service_model
 
 app = FastAPI()
 
 
 @app.get("/ping")
-def ping() -> models.Ping:
+def ping() -> dict:
     """Ping api."""
-    return models.Ping(pong="OK")
+    return {"pong": "OK"}
 
 
-# Nodes admin
-@app.post(RouterPath.NODES, response_model=models.Node)
-async def create_node(body: models.Node):
-    """Create a node."""
-    response = await service_node.create_node(body)
+# Admin model create
+@app.post(route_config.RouterAdmin.ADMIN)
+async def create_model(request: Request):
+    """Create a model."""
+    response = await service_model.create_model(await request.json())
     return response
 
 
-@app.get(RouterPath.NODES, response_model=List[models.Node])
-async def list_nodes():
-    """List nodes."""
-    response = await service_node.list_nodes()
+# Admin model list
+@app.get(route_config.RouterAdmin.ADMIN)
+async def list_models():
+    """List models."""
+    response = await service_model.list_models()
     return response
 
 
-# Node level one.
-@app.get(RouterPath.LEVEL_ONE)
-@app.post(RouterPath.LEVEL_ONE)
-async def dynamic_node_level_one(
+# Path root.
+@app.get(route_config.Router.LEVEL_ROOT)
+@app.post(route_config.Router.LEVEL_ROOT)
+async def dynamic_path_level_root(
+    request: Request,
+    body: dict = Body(default={}),
+):
+    """Dynamic path level one."""
+    response = await service_model.get_service_method(request.method, body)
+    return response
+
+
+# Path level one.
+@app.get(route_config.Router.LEVEL_ONE)
+@app.post(route_config.Router.LEVEL_ONE)
+async def dynamic_path_level_one(
     level_one: str,
     request: Request,
-    body: dict = Body(...),
+    body: dict = Body(default={}),
 ):
-    """Dynamic node level one."""
-    response = await service_node.from_method(request.method, body, level_one)
+    """Dynamic path level one."""
+    response = await service_model.get_service_method(request.method, body, level_one)
     return response
 
 
-# Node level two.
-@app.get(RouterPath.LEVEL_TWO)
-@app.put(RouterPath.LEVEL_TWO)
-@app.post(RouterPath.LEVEL_TWO)
-@app.patch(RouterPath.LEVEL_TWO)
-@app.delete(RouterPath.LEVEL_TWO)
-async def dynamic_node_level_two(
+# Path level two.
+@app.get(route_config.Router.LEVEL_TWO)
+@app.put(route_config.Router.LEVEL_TWO)
+@app.post(route_config.Router.LEVEL_TWO)
+@app.patch(route_config.Router.LEVEL_TWO)
+@app.delete(route_config.Router.LEVEL_TWO)
+async def dynamic_path_level_two(
     level_one,
     level_two,
     request: Request,
-    body: dict = Body(...),
+    body: dict = Body(default={}),
 ):
-    """Dynamic node level two."""
-    response = await service_node.from_method(
+    """Dynamic path level two."""
+    response = await service_model.get_service_method(
         request.method, body, level_one, level_two
     )
     return response
 
 
-# Node level three.
-@app.get(RouterPath.LEVEL_THREE)
-@app.put(RouterPath.LEVEL_THREE)
-@app.post(RouterPath.LEVEL_THREE)
-@app.patch(RouterPath.LEVEL_THREE)
-@app.delete(RouterPath.LEVEL_THREE)
-async def dynamic_node_level_three(
+# Path level three.
+@app.get(route_config.Router.LEVEL_THREE)
+@app.put(route_config.Router.LEVEL_THREE)
+@app.post(route_config.Router.LEVEL_THREE)
+@app.patch(route_config.Router.LEVEL_THREE)
+@app.delete(route_config.Router.LEVEL_THREE)
+async def dynamic_path_level_three(
     level_one,
     level_two,
     level_three,
     request: Request,
-    body: dict = Body(...),
+    body: dict = Body(default={}),
 ):
-    """Dynamic node level three."""
-    response = await service_node.from_method(
+    """Dynamic path level three."""
+    response = await service_model.get_service_method(
         request.method,
         body,
         level_one,
@@ -88,22 +98,22 @@ async def dynamic_node_level_three(
     return response
 
 
-# Node level four.
-@app.get(RouterPath.LEVEL_FOUR)
-@app.put(RouterPath.LEVEL_FOUR)
-@app.post(RouterPath.LEVEL_FOUR)
-@app.patch(RouterPath.LEVEL_FOUR)
-@app.delete(RouterPath.LEVEL_FOUR)
-async def dynamic_node_level_four(
+# Path level four.
+@app.get(route_config.Router.LEVEL_FOUR)
+@app.put(route_config.Router.LEVEL_FOUR)
+@app.post(route_config.Router.LEVEL_FOUR)
+@app.patch(route_config.Router.LEVEL_FOUR)
+@app.delete(route_config.Router.LEVEL_FOUR)
+async def dynamic_path_level_four(
     level_one,
     level_two,
     level_three,
     level_four,
     request: Request,
-    body: dict = Body(...),
+    body: dict = Body(default={}),
 ):
-    """Dynamic node level four."""
-    response = await service_node.from_method(
+    """Dynamic path level four."""
+    response = await service_model.get_service_method(
         request.method,
         body,
         level_one,
@@ -114,23 +124,23 @@ async def dynamic_node_level_four(
     return response
 
 
-# Node level five.
-@app.get(RouterPath.LEVEL_FIVE)
-@app.put(RouterPath.LEVEL_FIVE)
-@app.post(RouterPath.LEVEL_FIVE)
-@app.patch(RouterPath.LEVEL_FIVE)
-@app.delete(RouterPath.LEVEL_FIVE)
-async def dynamic_node_level_five(
+# Path level five.
+@app.get(route_config.Router.LEVEL_FIVE)
+@app.put(route_config.Router.LEVEL_FIVE)
+@app.post(route_config.Router.LEVEL_FIVE)
+@app.patch(route_config.Router.LEVEL_FIVE)
+@app.delete(route_config.Router.LEVEL_FIVE)
+async def dynamic_path_level_five(
     level_one,
     level_two,
     level_three,
     level_four,
     level_five,
     request: Request,
-    body: dict = Body(...),
+    body: dict = Body(default={}),
 ):
-    """Dynamic node level five."""
-    response = await service_node.from_method(
+    """Dynamic path level five."""
+    response = await service_model.get_service_method(
         request.method,
         body,
         level_one,
@@ -142,13 +152,13 @@ async def dynamic_node_level_five(
     return response
 
 
-# Node level six.
-@app.get(RouterPath.LEVEL_SIX)
-@app.put(RouterPath.LEVEL_SIX)
-@app.post(RouterPath.LEVEL_SIX)
-@app.patch(RouterPath.LEVEL_SIX)
-@app.delete(RouterPath.LEVEL_SIX)
-async def dynamic_node_level_six(
+# Path level six.
+@app.get(route_config.Router.LEVEL_SIX)
+@app.put(route_config.Router.LEVEL_SIX)
+@app.post(route_config.Router.LEVEL_SIX)
+@app.patch(route_config.Router.LEVEL_SIX)
+@app.delete(route_config.Router.LEVEL_SIX)
+async def dynamic_path_level_six(
     level_one,
     level_two,
     level_three,
@@ -156,10 +166,10 @@ async def dynamic_node_level_six(
     level_five,
     level_six,
     request: Request,
-    body: dict = Body(...),
+    body: dict = Body(default={}),
 ):
-    """Dynamic node level six."""
-    response = await service_node.from_method(
+    """Dynamic path level six."""
+    response = await service_model.get_service_method(
         request.method,
         body,
         level_one,
@@ -172,12 +182,12 @@ async def dynamic_node_level_six(
     return response
 
 
-# Node level seven.
-@app.get(RouterPath.LEVEL_SEVEN)
-@app.put(RouterPath.LEVEL_SEVEN)
-@app.patch(RouterPath.LEVEL_SEVEN)
-@app.delete(RouterPath.LEVEL_SEVEN)
-async def dynamic_node_level_seven(
+# Path level seven.
+@app.get(route_config.Router.LEVEL_SEVEN)
+@app.put(route_config.Router.LEVEL_SEVEN)
+@app.patch(route_config.Router.LEVEL_SEVEN)
+@app.delete(route_config.Router.LEVEL_SEVEN)
+async def dynamic_path_level_seven(
     level_one,
     level_two,
     level_three,
@@ -186,10 +196,10 @@ async def dynamic_node_level_seven(
     level_six,
     level_seven,
     request: Request,
-    body: dict = Body(...),
+    body: dict = Body(default={}),
 ):
-    """Dynamic node level seven."""
-    response = await service_node.from_method(
+    """Dynamic path level seven."""
+    response = await service_model.get_service_method(
         request.method,
         body,
         level_one,
