@@ -18,8 +18,6 @@ ADMIN_SCHEMA = {
     },
     "model": {
         "type": "string",
-        "required": True,
-        "empty": False,
         "maxlength": 70,
         "regex": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
     },
@@ -27,8 +25,7 @@ ADMIN_SCHEMA = {
         "type": "dict",
         "required": True,
         "empty": False,
-        "minlength": 1,
-        "maxlength": 2,
+        "minlength": 1
     },
 }
 
