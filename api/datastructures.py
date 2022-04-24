@@ -20,8 +20,8 @@ class BaseModel:
 
     public_id: str = str(uuid.uuid4())
     created_at: datetime = datetime.now(timezone.utc)
-    updated_at: datetime = None
-    deleted_at: datetime = None
+    updated_at: Union[datetime, None] = None
+    deleted_at: Union[datetime, None] = None
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -45,22 +45,6 @@ class Model(BaseModel):
         self.path = self.path.strip().lower()
 
 
-@dataclass
-class APIResponse:
-    """Response Object"""
-
-    content: Union[list, dict]
-    status_code: int = status.HTTP_200_OK
-
-    def json(self) -> JSONResponse:
-        """Return JsonResponse.
-
-        Returns:
-            JSONResponse: json with content and status code.
-        """
-        return JSONResponse(status_code=self.status_code, content=self.content)
-
-
 @dataclass(frozen=True)
 class ResponseContext:
 
@@ -72,7 +56,11 @@ class ResponseContext:
     content: Union[list, dict] = None
 
     def json_response(self):
-        return APIResponse(content=self.content, status_code=self.status_code)
+        data = self.errors if self.errors else self.content
+        return JSONResponse(
+            status_code=self.status_code,
+            content=data,
+        )
 
 
 @dataclass(frozen=True)

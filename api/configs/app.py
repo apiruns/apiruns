@@ -20,10 +20,11 @@ INTERNALS = {
     "AUTHX": {
         "ON": os.environ.get("AUTHX", False),
         "JWT_SECRET": os.environ.get("AUTHX_JWT_SECRET"),
-        "JWT_EXP": os.environ.get("AUTHX_JWT_EXP"),
+        "JWT_EXP": int(os.environ.get("AUTHX_JWT_EXP")),
         "JWT_ALGORITHM": "HS256",
         "MODEL": "apisrun_users",
         "SIGN_IN_PATH": "/admin/users/signin",
         "REGISTER_PATH": "/admin/users",
+        "PASSWORD_SECRET": os.environ.get("AUTHX_PASSWORD_SECRET")
     }
 }

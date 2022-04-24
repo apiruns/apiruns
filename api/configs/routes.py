@@ -5,6 +5,9 @@ class RouterAdmin:
     """Router admin contants"""
 
     ADMIN = os.environ.get("ROUTE_ADMIN", "/admin/models")
+    # Internal feature
+    AUTHX_SIGN_IN = "/admin/users/signin"
+    AUTHX_REGISTER = "/admin/users"
 
 
 class Router:

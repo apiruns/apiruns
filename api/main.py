@@ -4,6 +4,7 @@ from fastapi import Request
 
 from api.configs import route_config
 from api.services import service_model
+from api.features.internals import features, InternalFeature
 
 app = FastAPI()
 
@@ -28,6 +29,25 @@ async def list_models():
     """List models."""
     response = await service_model.list_models()
     return response
+
+
+# Admin create users
+@app.post(route_config.RouterAdmin.AUTHX_REGISTER)
+async def create_users(request: Request):
+    """Create users."""
+    auth = features.get(InternalFeature.AUTHX)
+    response = await auth.create_user(await request.json())
+    return response.json_response()
+
+
+# Admin users sign in
+@app.post(route_config.RouterAdmin.AUTHX_SIGN_IN)
+async def users_sign(request: Request):
+    """Users sign in."""
+    auth = features.get(InternalFeature.AUTHX)
+    response = await auth.authentication(await request.json())
+    # TODO: validate check pass
+    return response.json_response()
 
 
 # Path root.

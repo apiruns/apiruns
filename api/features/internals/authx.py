@@ -1,5 +1,6 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
+from datetime import timedelta
 from datetime import timezone
 from typing import Union
 
@@ -31,14 +32,23 @@ class AuthXConfig:
 class User(BaseModel):
     password: str = ""
     email: str = ""
+    username: str = ""
+    verified: bool = field(default_factory=lambda: False)
 
     def protected(self) -> None:
-        p = self.password.encode("utf-8")
-        self.password = bcrypt.hashpw(p, bcrypt.gensalt(10))
+        if not self.password:
+            configs = app_configs.INTERNALS.get("AUTHX")
+            self.password = configs.get("PASSWORD_SECRET")
+
+        p = bcrypt.hashpw(
+            self.password.encode("utf-8"),
+            bcrypt.gensalt(10)
+        )
+        self.password = p.decode()
 
     def check(self, password: str) -> bool:
         p = password.encode("utf-8")
-        return bcrypt.checkpw(p, self.password)
+        return bcrypt.checkpw(p, self.password.encode("utf-8"))
 
     def to_response(self):
         r = self.to_json()
@@ -49,14 +59,14 @@ class User(BaseModel):
 class Queries:
     @staticmethod
     async def find_user(model: str, email: str) -> Union[User, None]:
-        obj = repository.find_one(model, {"email": email})
+        obj = await repository.find_one(model, {"username": email})
         if obj:
             return from_dict(User, obj)
         return
 
     @staticmethod
     async def create_user(data: dict, model: str) -> Union[User, None]:
-        obj = repository.create_one(data, model)
+        obj = await repository.create_one(data, model)
         if obj:
             return from_dict(User, obj)
         return
@@ -70,23 +80,41 @@ class AuthX:
     TOKEN_EXPIRED = {"error": "Your token has expired"}
     TOKEN_INVALID = {"error": "Your token is invalid"}
     EMAIL_EXIST = {"error": "email already exists"}
+    USER_EXIST = {"error": "username already exists"}
     USER_NOT_CREATED = {"error": "user not created"}
-    AUTH_FAILED = {"error": "email or password wrong"}
+    AUTH_FAILED = {"error": "username or password wrong"}
 
     # validations
     CERBERUS_USER_SCHEMA = {
         "email": {
+            "required": False,
             "type": "string",
             "regex": r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$",
+        },
+        "username": {
+            "required": True,
+            "type": "string",
+            "regex": r"^[a-zA-Z0-9_]*$",
         },
         "password": {
             "type": "string",
             "regex": r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{6,20}$",  # no-qa
         },
     }
+    CERBERUS_SIGN_IN_SCHEMA = {
+        "username": {
+            "type": "string",
+            "regex": r"^[a-zA-Z0-9_]*$",
+            "required": True,
+        },
+        "password": {
+            "required": True,
+            "type": "string",
+        },
+    }
 
     def __init__(self):
-        configs = app_configs["INTERNALS"].get("AUTHX")
+        configs = app_configs.INTERNALS.get("AUTHX")
         self.configs = from_dict(AuthXConfig, configs)
 
     async def handle(self, context: InputContext):
@@ -113,13 +141,13 @@ class AuthX:
         self.configs = from_dict(AuthXConfig, config)
         return self.configs
 
-    def encode(self, payload: dict) -> str:
-        exp = datetime.timedelta(seconds=self.configs.JWT_EXP)
+    def encode(self, **kwargs: dict) -> str:
+        exp = datetime.now(tz=timezone.utc) + timedelta(seconds=self.configs.JWT_EXP)
         default = {"exp": exp, "iat": datetime.now(tz=timezone.utc)}
         token_bytes = jwt.encode(
-            {**payload, **default}, self.configs.JWT_SECRET, algorithm=self.ALGORITHM
+            {**kwargs, **default}, self.configs.JWT_SECRET, algorithm=self.configs.JWT_ALGORITHM
         )
-        return token_bytes.decode()
+        return token_bytes
 
     def decode(self, headers: dict) -> ResponseContext:
         authorization_h = headers.get("Authorization")
@@ -140,7 +168,7 @@ class AuthX:
 
         try:
             p = jwt.decode(
-                t_value, app_configs.JWT_SECRET, algorithms=self.config.ALGORITHM
+                t_value, app_configs.JWT_SECRET, algorithms=self.config.JWT_ALGORITHM
             )
             return ResponseContext(
                 content={"payload": p},
@@ -160,13 +188,13 @@ class AuthX:
         return self.decode(headers)
 
     async def authentication(self, payload: dict) -> ResponseContext:
-        errors = validate.data_is_valid(self.CERBERUS_USER_SCHEMA, payload)
+        errors = validate.data_is_valid(self.CERBERUS_SIGN_IN_SCHEMA, payload)
         if errors:
             return ResponseContext(
                 status_code=status.HTTP_400_BAD_REQUEST, errors=errors
             )
 
-        user = await Queries.find_user(self.MODEL, payload.get("email"))
+        user = await Queries.find_user(self.configs.MODEL, payload.get("username"))
         if not user:
             return ResponseContext(
                 status_code=status.HTTP_400_BAD_REQUEST, errors=self.AUTH_FAILED
@@ -178,7 +206,7 @@ class AuthX:
                 status_code=status.HTTP_400_BAD_REQUEST, errors=self.AUTH_FAILED
             )
 
-        token = self.encode({"iss": user.public_id})
+        token = self.encode(username=user.username)
         return ResponseContext(
             status_code=status.HTTP_200_OK,
             content={"token": token, **user.to_response()},
@@ -191,20 +219,22 @@ class AuthX:
                 status_code=status.HTTP_400_BAD_REQUEST, errors=errors
             )
 
-        user = await Queries.find_user(self.MODEL, payload.get("email"))
+        user = await Queries.find_user(self.configs.MODEL, payload.get("username"))
         if user:
             return ResponseContext(
-                status_code=status.HTTP_400_BAD_REQUEST, errors=self.EMAIL_EXIST
+                status_code=status.HTTP_400_BAD_REQUEST, errors=self.USER_EXIST
             )
         user_unverified = from_dict(User, payload)
         user_unverified.protected()
 
-        user = await Queries.create_user(user_unverified.to_json(), self.MODEL)
+        user = await Queries.create_user(user_unverified.to_dict(), self.configs.MODEL)
         if not user:
             return ResponseContext(
                 status_code=status.HTTP_400_BAD_REQUEST, errors=self.USER_NOT_CREATED
             )
 
+        content = user.to_response()
+        content["token"] = self.encode(username=user.username)
         return ResponseContext(
-            status_code=status.HTTP_201_CREATED, content=user.to_response()
+            status_code=status.HTTP_201_CREATED, content=content
         )
