@@ -26,7 +26,8 @@ class ServiceModelMongo:
                 status_code=status.HTTP_400_BAD_REQUEST, content={"error": errors}
             )
 
-        exist_model = await repository.exist_model(body.get("model"))
+        model = body.get("model") if body.get("model") else str(uuid.uuid4())
+        exist_model = await repository.exist_model(model)
         if exist_model:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,

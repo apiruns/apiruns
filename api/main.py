@@ -5,6 +5,8 @@ from fastapi import Request
 from api.configs import route_config
 from api.services import service_model
 from api.features.internals import features, InternalFeature
+from fastapi import HTTPException
+from fastapi import status
 
 app = FastAPI()
 
@@ -19,9 +21,14 @@ def ping() -> dict:
 @app.post(route_config.RouterAdmin.ADMIN)
 async def create_model(request: Request):
     """Create a model."""
-    response = await service_model.create_model(await request.json())
-    return response
-
+    try:
+        response = await service_model.create_model(await request.json())
+        return response
+    except: # TODO: validate except
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Body requeried",
+        )
 
 # Admin model list
 @app.get(route_config.RouterAdmin.ADMIN)
