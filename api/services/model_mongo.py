@@ -18,6 +18,17 @@ class ServiceModelMongo:
     """Service Model for mongo."""
 
     @staticmethod
+    async def delete_model(body: dict):
+        errors, body = validate.admin_delete(body=body)
+        if errors:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST, content={"error": errors}
+            )
+        
+        response = await repository.delete_admin_model(body)
+        return JSONResponse(status_code=status.HTTP_204_NO_CONTENT, content=response)
+
+    @staticmethod
     async def create_model(body: dict):
         """Create a model document in mongo"""
         errors, body = validate.admin_model(body=body)

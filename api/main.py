@@ -36,6 +36,18 @@ async def list_models():
     response = await service_model.list_models()
     return response
 
+# Admin model delete
+@app.delete(route_config.RouterAdmin.ADMIN)
+async def list_models(request: Request):
+    """List models."""
+    try: 
+        response = await service_model.delete_model(await request.json())
+        return response
+    except: 
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Body requeried",
+        )
 
 # Path root.
 @app.get(route_config.Router.LEVEL_ROOT)

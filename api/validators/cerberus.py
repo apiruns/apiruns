@@ -29,6 +29,20 @@ ADMIN_SCHEMA = {
     },
 }
 
+ADMIN_DELETE_PATH = {
+    "path": {
+        "type": "string",
+        "minlength": 1,
+        "regex": "^/|/[a-z0-9]+(?:/[a-z0-9]+|/)*$",
+    }
+}
+ADMIN_DELETE_MODEL = {
+    "model": {
+        "type": "string",
+        "maxlength": 70,
+        "regex": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+    },
+}
 
 class Cerberus:
     """Cerberus Validator, contains validation methods."""
@@ -84,3 +98,15 @@ class Cerberus:
         model = from_dict(data_class=Model, data=body)
 
         return Cerberus.schema_is_valid(model.schema), model.to_json()
+
+    @staticmethod
+    def admin_delete(body: dict) -> Tuple[dict, str]:
+        error_model = Cerberus.data_is_valid(ADMIN_DELETE_PATH, body)
+        error_path = Cerberus.data_is_valid(ADMIN_DELETE_MODEL, body)
+        if error_path and error_model:
+            return {"path": error_path, "model": error_model}, "error by both"
+
+        if error_model:
+            return {}, {"key": "model", "value": body.get("model")}
+
+        return {}, {"key": "path", "value": body.get("path")}
