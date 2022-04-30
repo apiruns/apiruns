@@ -140,6 +140,20 @@ class MongoRepository:
         return row
 
     @staticmethod
+    async def delete_admin_model(body: dict) -> int:
+        """Delete a admin model.
+
+        Args:
+            body (dict): body of admin model.
+
+        Returns:
+            dict: model admin.
+        """
+        response = await db[ADMIN_MODEL].delete_one({body.get("key"): body.get("value")})
+        return response.deleted_count
+
+
+    @staticmethod
     async def list_admin_model() -> List[dict]:
         """List admin models
 
