@@ -5,6 +5,10 @@ ENGINE_URI_DEFAULT = "mongodb://0.0.0.0:27017/"
 ENGINE_NAME = os.environ.get("ENGINE_NAME", "MONGO")
 ENGINE_DB_NAME = os.environ.get("ENGINE_DB_NAME", "apisrun")
 ENGINE_URI = os.environ.get("ENGINE_URI", ENGINE_URI_DEFAULT)
+ORIGINS = [
+    "http://localhost",
+    "http://localhost:8080",
+]
 
 # Validator configs
 VALIDATOR_NAME = "CERBERUS"
@@ -19,12 +23,12 @@ PATH_SECTION = 7
 INTERNALS = {
     "AUTHX": {
         "ON": os.environ.get("AUTHX", False),
-        "JWT_SECRET": os.environ.get("AUTHX_JWT_SECRET"),
-        "JWT_EXP": int(os.environ.get("AUTHX_JWT_EXP")),
+        "JWT_SECRET": os.environ.get("AUTHX_JWT_SECRET", "SUPER_SECRET"),
+        "JWT_EXP": int(os.environ.get("AUTHX_JWT_EXP", 3600)),
         "JWT_ALGORITHM": "HS256",
         "MODEL": "apisrun_users",
         "SIGN_IN_PATH": "/admin/users/signin",
         "REGISTER_PATH": "/admin/users",
-        "PASSWORD_SECRET": os.environ.get("AUTHX_PASSWORD_SECRET")
+        "PASSWORD_SECRET": os.environ.get("AUTHX_PASSWORD_SECRET"),
     }
 }

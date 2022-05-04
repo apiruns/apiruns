@@ -1,16 +1,34 @@
 from fastapi import Body
 from fastapi import FastAPI
 from fastapi import Request
+from fastapi.middleware.cors import CORSMiddleware
 
+from api.configs import app_configs
 from api.configs import route_config
+from api.features.internals import features
+from api.features.internals import InternalFeature
+from api.middleware import set_body
 from api.services import service_model
-from api.features.internals import features, InternalFeature
-from fastapi import HTTPException
-from fastapi import status
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=app_configs.ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
+@app.middleware("http")
+async def app_entry(request: Request, call_next):
+    """Request middleware"""
+    await set_body(request, await request.body())
+    response = await call_next(request)
+    return response
+
+
+# API Health
 @app.get("/ping")
 def ping() -> dict:
     """Ping api."""
@@ -21,14 +39,10 @@ def ping() -> dict:
 @app.post(route_config.RouterAdmin.ADMIN)
 async def create_model(request: Request):
     """Create a model."""
-    try:
-        response = await service_model.create_model(await request.json())
-        return response
-    except: # TODO: validate except
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Body requeried",
-        )
+    body = await request.json()
+    response = await service_model.create_model(body)
+    return response
+
 
 # Admin model list
 @app.get(route_config.RouterAdmin.ADMIN)
@@ -37,18 +51,6 @@ async def list_models():
     response = await service_model.list_models()
     return response
 
-# Admin model delete
-@app.delete(route_config.RouterAdmin.ADMIN)
-async def list_models(request: Request):
-    """List models."""
-    try: 
-        response = await service_model.delete_model(await request.json())
-        return response
-    except: 
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Body requeried",
-        )
 
 # Admin create users
 @app.post(route_config.RouterAdmin.AUTHX_REGISTER)
