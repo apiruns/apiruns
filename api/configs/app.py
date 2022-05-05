@@ -29,6 +29,5 @@ INTERNALS = {
         "MODEL": "apisrun_users",
         "SIGN_IN_PATH": "/admin/users/signin",
         "REGISTER_PATH": "/admin/users",
-        "PASSWORD_SECRET": os.environ.get("AUTHX_PASSWORD_SECRET"),
     }
 }

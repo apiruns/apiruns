@@ -7,6 +7,7 @@ from api.configs import app_configs
 from api.configs import route_config
 from api.features.internals import features
 from api.features.internals import InternalFeature
+from api.middleware import get_context
 from api.middleware import set_body
 from api.services import service_model
 
@@ -24,6 +25,7 @@ app.add_middleware(
 async def app_entry(request: Request, call_next):
     """Request middleware"""
     await set_body(request, await request.body())
+    request.state.input_context = await get_context(request)
     response = await call_next(request)
     return response
 
@@ -39,8 +41,7 @@ def ping() -> dict:
 @app.post(route_config.RouterAdmin.ADMIN)
 async def create_model(request: Request):
     """Create a model."""
-    body = await request.json()
-    response = await service_model.create_model(body)
+    response = await service_model.create_model(request.state.input_context)
     return response
 
 
@@ -67,7 +68,6 @@ async def users_sign(request: Request):
     """Users sign in."""
     auth = features.get(InternalFeature.AUTHX)
     response = await auth.authentication(await request.json())
-    # TODO: validate check pass
     return response.json_response()
 
 

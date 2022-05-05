@@ -1,4 +1,5 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from dataclasses import field
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
@@ -36,14 +37,7 @@ class User(BaseModel):
     verified: bool = field(default_factory=lambda: False)
 
     def protected(self) -> None:
-        if not self.password:
-            configs = app_configs.INTERNALS.get("AUTHX")
-            self.password = configs.get("PASSWORD_SECRET")
-
-        p = bcrypt.hashpw(
-            self.password.encode("utf-8"),
-            bcrypt.gensalt(10)
-        )
+        p = bcrypt.hashpw(self.password.encode("utf-8"), bcrypt.gensalt(10))
         self.password = p.decode()
 
     def check(self, password: str) -> bool:
@@ -98,6 +92,7 @@ class AuthX:
         },
         "password": {
             "type": "string",
+            "required": True,
             "regex": r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{6,20}$",  # no-qa
         },
     }
@@ -118,21 +113,7 @@ class AuthX:
         self.configs = from_dict(AuthXConfig, configs)
 
     async def handle(self, context: InputContext):
-        if (
-            self.configs.SIGN_IN_PATH == context.model["path"]
-            and context.method == "POST"
-        ):
-            resp = await self.authentication(context.body)
-            return resp
-
-        if (
-            self.configs.REGISTER_PATH == context.model["path"]
-            and context.method == "POST"
-        ):
-            resp = await self.create_user(context.body)
-            return resp
-
-        return self.authorization(context.model, context.headers)
+        return self.authorization(context.headers)
 
     def is_on(self) -> bool:
         return self.configs.ON
@@ -145,7 +126,9 @@ class AuthX:
         exp = datetime.now(tz=timezone.utc) + timedelta(seconds=self.configs.JWT_EXP)
         default = {"exp": exp, "iat": datetime.now(tz=timezone.utc)}
         token_bytes = jwt.encode(
-            {**kwargs, **default}, self.configs.JWT_SECRET, algorithm=self.configs.JWT_ALGORITHM
+            {**kwargs, **default},
+            self.configs.JWT_SECRET,
+            algorithm=self.configs.JWT_ALGORITHM,
         )
         return token_bytes
 
@@ -167,12 +150,10 @@ class AuthX:
             )
 
         try:
-            p = jwt.decode(
-                t_value, app_configs.JWT_SECRET, algorithms=self.config.JWT_ALGORITHM
+            jwt.decode(
+                t_value, self.configs.JWT_SECRET, algorithms=self.configs.JWT_ALGORITHM
             )
-            return ResponseContext(
-                content={"payload": p},
-            )
+            return ResponseContext()
         except jwt.ExpiredSignatureError:
             return ResponseContext(
                 errors=self.TOKEN_EXPIRED, status_code=status.HTTP_401_UNAUTHORIZED
@@ -182,9 +163,7 @@ class AuthX:
                 errors=self.TOKEN_INVALID, status_code=status.HTTP_401_UNAUTHORIZED
             )
 
-    def authorization(self, model: dict, headers: dict) -> ResponseContext:
-        if "protected" not in model:
-            return ResponseContext()
+    def authorization(self, headers: dict) -> ResponseContext:
         return self.decode(headers)
 
     async def authentication(self, payload: dict) -> ResponseContext:
@@ -235,6 +214,4 @@ class AuthX:
 
         content = user.to_response()
         content["token"] = self.encode(username=user.username)
-        return ResponseContext(
-            status_code=status.HTTP_201_CREATED, content=content
-        )
+        return ResponseContext(status_code=status.HTTP_201_CREATED, content=content)

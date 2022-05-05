@@ -14,18 +14,19 @@ class InternalFeature:
 features = {InternalFeature.AUTHX: AuthX()}
 
 
-def internal_handle(context: InputContext) -> Union[ResponseContext, None]:
+async def internal_handle(context: InputContext) -> Union[ResponseContext, None]:
 
     ctx_response = None
-    for feature in features:
+    for feature in features.values():
         if not feature.is_on:
             continue
-        resp = feature.handle(context)
+        resp = await feature.handle(context)
         if resp.errors:
             ctx_response = resp
             break
 
-        if resp.context:
-            context.body = resp.context
+        if resp.content:
+            ctx_response = resp
+            break
 
     return ctx_response

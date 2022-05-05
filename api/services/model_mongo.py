@@ -8,6 +8,8 @@ from fastapi.responses import Response
 
 from api.configs import app_configs
 from api.configs import route_config as rt
+from api.datastructures import InputContext
+from api.features.internals import internal_handle
 from api.repositories import repository
 from api.utils.node import build_path_from_params
 from api.utils.node import paths_with_slash
@@ -24,14 +26,18 @@ class ServiceModelMongo:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST, content={"error": errors}
             )
-        
+
         response = await repository.delete_admin_model(body)
         return JSONResponse(status_code=status.HTTP_204_NO_CONTENT, content=response)
 
     @staticmethod
-    async def create_model(body: dict):
+    async def create_model(context: InputContext):
         """Create a model document in mongo"""
-        errors, body = validate.admin_model(body=body)
+        response = await internal_handle(context)
+        if response is not None:
+            return response.json_response()
+
+        errors, body = validate.admin_model(body=context.body)
         if errors:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST, content={"error": errors}
@@ -45,7 +51,9 @@ class ServiceModelMongo:
                 content={"error": "the model already exists."},
             )
 
-        exist_path = await repository.exist_path(paths_with_slash(body.get("path")))
+        exist_path = await repository.exist_path(
+            paths_with_slash(context.body.get("path"))
+        )
         if exist_path:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
