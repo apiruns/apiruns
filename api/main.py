@@ -8,7 +8,7 @@ from api.configs import route_config
 from api.features.internals import features
 from api.features.internals import InternalFeature
 from api.middleware import get_context
-from api.middleware import set_body
+from api.middleware import get_internal_feature
 from api.services import service_model
 
 app = FastAPI()
@@ -23,15 +23,17 @@ app.add_middleware(
 
 @app.middleware("http")
 async def app_entry(request: Request, call_next):
-    """Request middleware"""
-    await set_body(request, await request.body())
+    """Request handle middleware"""
     request.state.input_context = await get_context(request)
+    resp = await get_internal_feature(request.state.input_context)
+    if resp.errors:
+        return resp.json_response()
     response = await call_next(request)
     return response
 
 
 # API Health
-@app.get("/ping")
+@app.get(route_config.RouterAdmin.PING)
 def ping() -> dict:
     """Ping api."""
     return {"pong": "OK"}
@@ -57,8 +59,9 @@ async def list_models():
 @app.post(route_config.RouterAdmin.AUTHX_REGISTER)
 async def create_users(request: Request):
     """Create users."""
+    context = request.state.input_context
     auth = features.get(InternalFeature.AUTHX)
-    response = await auth.create_user(await request.json())
+    response = await auth.create_user(context.body)
     return response.json_response()
 
 
@@ -66,8 +69,9 @@ async def create_users(request: Request):
 @app.post(route_config.RouterAdmin.AUTHX_SIGN_IN)
 async def users_sign(request: Request):
     """Users sign in."""
+    context = request.state.input_context
     auth = features.get(InternalFeature.AUTHX)
-    response = await auth.authentication(await request.json())
+    response = await auth.authentication(context.body)
     return response.json_response()
 
 
@@ -79,8 +83,7 @@ async def dynamic_path_level_root(
     body: dict = Body(default={}),
 ):
     """Dynamic path level one."""
-    response = await service_model.get_service_method(request.method, body)
-    return response
+    return {}
 
 
 # Path level one.

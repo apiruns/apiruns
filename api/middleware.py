@@ -1,35 +1,26 @@
+import json
+
 from fastapi import Request
 
 from api.datastructures import InputContext
+from api.datastructures import ResponseContext
+from api.features.internals import features
+from api.features.internals import InternalFeature
 
 
-async def set_body(request: Request, b: bytes):
-    """Set request body util.
-
-    Args:
-        request (Request): Request obj.
-        b (bytes): Body bytes obj.
-    """
-
-    async def receive():
-        body = b"{}" if b == b"" else b
-        return {"type": "http.request", "body": body}
-
-    request._receive = receive
-
-
-async def get_body(request: Request) -> bytes:
-    """Get body bytes from request.
+async def validate_body(request: Request) -> dict:
+    """Validate request body
 
     Args:
-        request (Request): _description_
+        request (Request): request object.
 
     Returns:
-        bytes: Body seted.
+        dict: Json valid.
     """
-    body = await request.body()
-    await set_body(request, body)
-    return body
+    try:
+        return await request.json()
+    except json.decoder.JSONDecodeError:
+        return {}
 
 
 async def get_context(request: Request) -> InputContext:
@@ -41,10 +32,25 @@ async def get_context(request: Request) -> InputContext:
     Returns:
         InputContext: Input context.
     """
-    body = await request.json()
+    body = await validate_body(request)
     return InputContext(
         body=body,
         headers=request.headers,
         method=request.method,
         model={"path": request.url.path},
     )
+
+
+async def get_internal_feature(context: InputContext) -> ResponseContext:
+    """Get internal feature.
+
+    Args:
+        context (InputContext): input context.
+
+    Returns:
+        ResponseContext: response context.
+    """
+    auth = features.get(InternalFeature.AUTHX)
+    if auth.is_on():
+        return ResponseContext()
+    return await auth.handle(context)

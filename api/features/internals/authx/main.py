@@ -10,6 +10,7 @@ from .models import AuthXConfig
 from .models import Queries
 from .models import User
 from api.configs import app_configs
+from api.configs import route_config
 from api.datastructures import InputContext
 from api.datastructures import ResponseContext
 from api.validators import validate
@@ -71,7 +72,25 @@ class AuthX:
         Returns:
             response (ResponseContext): response context.
         """
+        if self.is_path_excluded(context.model.get("path")):
+            return ResponseContext()
         return self.decode(context.headers)
+
+    def is_path_excluded(self, path) -> bool:
+        """Validate if is a path excluded.
+
+        Args:
+            path (str): request path.
+
+        Returns:
+            bool: True if is excluded.
+        """
+        excluded = (
+            route_config.RouterAdmin.PING,
+            route_config.RouterAdmin.AUTHX_REGISTER,
+            route_config.RouterAdmin.AUTHX_SIGN_IN,
+        )
+        return path in excluded
 
     def is_on(self) -> bool:
         """Feature is On or Off.

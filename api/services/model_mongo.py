@@ -1,4 +1,5 @@
 import uuid
+from api.utils.common import get_or_create_model
 
 from fastapi import HTTPException
 from fastapi import status
@@ -9,11 +10,11 @@ from fastapi.responses import Response
 from api.configs import app_configs
 from api.configs import route_config as rt
 from api.datastructures import InputContext
-from api.features.internals import internal_handle
 from api.repositories import repository
 from api.utils.node import build_path_from_params
 from api.utils.node import paths_with_slash
 from api.validators import validate
+from api.configs import route_config
 
 
 class ServiceModelMongo:
@@ -33,27 +34,27 @@ class ServiceModelMongo:
     @staticmethod
     async def create_model(context: InputContext):
         """Create a model document in mongo"""
-        response = await internal_handle(context)
-        if response is not None:
-            return response.json_response()
-
         errors, body = validate.admin_model(body=context.body)
         if errors:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST, content={"error": errors}
             )
 
-        model = body.get("model") if body.get("model") else str(uuid.uuid4())
+        model = get_or_create_model(body.get("model"))
         exist_model = await repository.exist_model(model)
         if exist_model:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content={"error": "the model already exists."},
             )
+        paths = paths_with_slash(context.body.get("path"))
+        if route_config.RouterAdmin.is_excluded(paths):
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={"error": "the path already exists, is admin path."},
+            )
 
-        exist_path = await repository.exist_path(
-            paths_with_slash(context.body.get("path"))
-        )
+        exist_path = await repository.exist_path(paths)
         if exist_path:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,

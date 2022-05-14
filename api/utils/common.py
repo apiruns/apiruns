@@ -1,3 +1,4 @@
+import uuid
 from datetime import date
 from datetime import datetime
 
@@ -20,3 +21,18 @@ def json_serial(obj):
     if isinstance(obj, (datetime, date)):
         return obj.isoformat()
     raise TypeError("Type %s not serializable" % type(obj))
+
+
+def get_or_create_model(name) -> str:
+    """Get or create model name with uuid.
+
+    Args:
+        name (str): Model name.
+
+    Returns:
+        str: Original name or uuid name.
+    """
+    if not name:
+        u = uuid.uuid4()
+        return f"model_{str(u)}"
+    return name
