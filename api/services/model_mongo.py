@@ -2,7 +2,6 @@ import uuid
 
 from fastapi import HTTPException
 from fastapi import status
-from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from fastapi.responses import Response
 
@@ -12,8 +11,7 @@ from api.configs import route_config as rt
 from api.datastructures import InputContext
 from api.repositories import repository
 from api.utils.common import get_or_create_model
-from api.utils.node import build_path_from_params
-from api.utils.node import paths_with_slash
+from api.utils.common import paths_without_slash
 from api.validators import validate
 
 
@@ -41,27 +39,23 @@ class ServiceModelMongo:
             )
 
         model = get_or_create_model(body.get("model"))
-        exist_model = await repository.exist_model(model)
-        if exist_model:
-            return JSONResponse(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                content={"error": "the model already exists."},
-            )
-        paths = paths_with_slash(context.body.get("path"))
-        if route_config.RouterAdmin.is_excluded(paths):
+        path = paths_without_slash(context.body.get("path"))
+        if path in route_config.RouterAdmin.excluded():
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content={"error": "the path already exists, is admin path."},
             )
 
-        exist_path = await repository.exist_path(paths)
-        if exist_path:
+        obj = await repository.exist_path_or_model(path, model)
+        if obj:
+            name = "path" if obj.get("path") == path else "model"
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                content={"error": "the path already exists."},
+                content={"error": f"the {name} already exists."},
             )
-        # TODO: This validation can be one query
 
+        body["model"] = model
+        body["path"] = path
         response = await repository.create_admin_model(body)
         return JSONResponse(status_code=status.HTTP_201_CREATED, content=response)
 
@@ -72,7 +66,7 @@ class ServiceModelMongo:
         return models
 
     @staticmethod
-    async def get_service_method(method, body, *args):
+    async def get_service_method(context: InputContext):
         """Define the service to use according to the http method."""
         repositories = {
             rt.HTTPMethod.POST: ServiceModelMongo.post,
@@ -81,44 +75,44 @@ class ServiceModelMongo:
             rt.HTTPMethod.PATCH: ServiceModelMongo.put,
             rt.HTTPMethod.DELETE: ServiceModelMongo.delete,
         }
-        service = repositories.get(method)
+        service = repositories.get(context.method)
         if not service:
             raise HTTPException(
                 status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
                 detail="Method Not Allowed",
             )
 
-        response = await service(body, args)
+        response = await service(context)
         return response
 
     @staticmethod
-    async def get(body, args):
+    async def get(context):
         """Get method return an object from model."""
-        original_path, modified_path, _id = build_path_from_params(args)
-        model = await repository.model_by_path(paths_with_slash(modified_path))
+        model = await repository.model_by_path(context.path)
         if model:
-            response = await repository.find_one_or_many(model["model"], _id)
+            response = await repository.find_one_or_many(
+                model["model"], context.resource_id
+            )
             if response is not None:
                 return response
 
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Resource `{original_path}` not found !",
+            detail=f"Resource `{context.original_path}` not found !",
         )
 
     @staticmethod
-    async def post(body, args):
+    async def post(context):
         """Post method create a new object."""
-        original_path, modified_path, _id = build_path_from_params(args)
-        if _id:
+        if context.resource_id:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Resource `{original_path}` not found !",
+                detail=f"Resource `{context.original_path}` not found !",
             )
 
-        model = await repository.model_by_path(paths_with_slash(modified_path))
+        model = await repository.model_by_path(context.path)
         if model:
-            payload = jsonable_encoder(body)
+            payload = context.body
             errors = validate.data_is_valid(model["schema"], payload)
             if errors:
                 return JSONResponse(
@@ -133,40 +127,40 @@ class ServiceModelMongo:
 
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Resource `{original_path}` not found !",
+            detail=f"Resource `{context.original_path}` not found !",
         )
 
     @staticmethod
-    async def put(body, args):
+    async def put(context):
         """Put method can modify the object."""
-        original_path, modified_path, _id = build_path_from_params(args)
-        model = await repository.model_by_path(paths_with_slash(modified_path))
+        model = await repository.model_by_path(context.path)
         if model:
-            payload = jsonable_encoder(body)
+            payload = context.body
             errors = validate.data_is_valid(model["schema"], payload)
             if errors:
                 return JSONResponse(
                     status_code=status.HTTP_400_BAD_REQUEST, content=errors
                 )
             else:
-                await repository.update_one(model["model"], _id, payload)
+                await repository.update_one(
+                    model["model"], context.resource_id, payload
+                )
                 return Response(status_code=status.HTTP_204_NO_CONTENT)
 
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Resource `{original_path}` not found !",
+            detail=f"Resource `{context.original_path}` not found !",
         )
 
     @staticmethod
-    async def delete(body, args):
+    async def delete(context):
         """Delete method can delete an object."""
-        original_path, modified_path, _id = build_path_from_params(args)
-        model = await repository.model_by_path(paths_with_slash(modified_path))
+        model = await repository.model_by_path(context.path)
         if model:
-            await repository.delete_one(model["model"], _id)
+            await repository.delete_one(model["model"], context.resource_id)
             return Response(status_code=status.HTTP_204_NO_CONTENT)
 
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Resource `{original_path}` not found !",
+            detail=f"Resource `{context.original_path}` not found !",
         )

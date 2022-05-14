@@ -83,6 +83,7 @@ class MongoRepository:
             int: Document modified count.
         """
         response = await db[model].update_one({ID_FIELD: _id}, {"$set": data})
+        print(response.modified_count)
         return response.modified_count
 
     @staticmethod
@@ -113,8 +114,8 @@ class MongoRepository:
         return rows > 0
 
     @staticmethod
-    async def exist_path(path: str) -> bool:
-        """Validate existence of the path in admin model.
+    async def exist_path_or_model(path: str, model: str) -> bool:
+        """Validate existence of the path or model in admin model.
 
         Args:
             path (str): path url.
@@ -122,8 +123,10 @@ class MongoRepository:
         Returns:
             bool: exist path.
         """
-        rows = await db[ADMIN_MODEL].count_documents({"path": {"$in": path}})
-        return rows > 0
+        response = await db[ADMIN_MODEL].find_one(
+            {"$or": [{"path": path}, {"model": model}]}, {"_id": 0}
+        )
+        return response
 
     @staticmethod
     async def create_admin_model(body: dict) -> dict:
@@ -149,9 +152,10 @@ class MongoRepository:
         Returns:
             dict: model admin.
         """
-        response = await db[ADMIN_MODEL].delete_one({body.get("key"): body.get("value")})
+        response = await db[ADMIN_MODEL].delete_one(
+            {body.get("key"): body.get("value")}
+        )
         return response.deleted_count
-
 
     @staticmethod
     async def list_admin_model() -> List[dict]:
@@ -173,7 +177,7 @@ class MongoRepository:
         Returns:
             dict: admin model
         """
-        row = await db[ADMIN_MODEL].find_one({"path": {"$in": path}}, {"_id": 0})
+        row = await db[ADMIN_MODEL].find_one({"path": path}, {"_id": 0})
         return row
 
     @staticmethod

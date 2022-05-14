@@ -89,13 +89,9 @@ async def dynamic_path_level_root(
 # Path level one.
 @app.get(route_config.Router.LEVEL_ONE)
 @app.post(route_config.Router.LEVEL_ONE)
-async def dynamic_path_level_one(
-    level_one: str,
-    request: Request,
-    body: dict = Body(default={}),
-):
+async def dynamic_path_level_one(request: Request, level_one: str):
     """Dynamic path level one."""
-    response = await service_model.get_service_method(request.method, body, level_one)
+    response = await service_model.get_service_method(request.state.input_context)
     return response
 
 
@@ -106,15 +102,10 @@ async def dynamic_path_level_one(
 @app.patch(route_config.Router.LEVEL_TWO)
 @app.delete(route_config.Router.LEVEL_TWO)
 async def dynamic_path_level_two(
-    level_one,
-    level_two,
     request: Request,
-    body: dict = Body(default={}),
 ):
     """Dynamic path level two."""
-    response = await service_model.get_service_method(
-        request.method, body, level_one, level_two
-    )
+    response = await service_model.get_service_method(request.state.input_context)
     return response
 
 
@@ -125,20 +116,10 @@ async def dynamic_path_level_two(
 @app.patch(route_config.Router.LEVEL_THREE)
 @app.delete(route_config.Router.LEVEL_THREE)
 async def dynamic_path_level_three(
-    level_one,
-    level_two,
-    level_three,
     request: Request,
-    body: dict = Body(default={}),
 ):
     """Dynamic path level three."""
-    response = await service_model.get_service_method(
-        request.method,
-        body,
-        level_one,
-        level_two,
-        level_three,
-    )
+    response = await service_model.get_service_method(request.state.input_context)
     return response
 
 
@@ -149,22 +130,10 @@ async def dynamic_path_level_three(
 @app.patch(route_config.Router.LEVEL_FOUR)
 @app.delete(route_config.Router.LEVEL_FOUR)
 async def dynamic_path_level_four(
-    level_one,
-    level_two,
-    level_three,
-    level_four,
     request: Request,
-    body: dict = Body(default={}),
 ):
     """Dynamic path level four."""
-    response = await service_model.get_service_method(
-        request.method,
-        body,
-        level_one,
-        level_two,
-        level_three,
-        level_four,
-    )
+    response = await service_model.get_service_method(request.state.input_context)
     return response
 
 
@@ -175,24 +144,10 @@ async def dynamic_path_level_four(
 @app.patch(route_config.Router.LEVEL_FIVE)
 @app.delete(route_config.Router.LEVEL_FIVE)
 async def dynamic_path_level_five(
-    level_one,
-    level_two,
-    level_three,
-    level_four,
-    level_five,
     request: Request,
-    body: dict = Body(default={}),
 ):
     """Dynamic path level five."""
-    response = await service_model.get_service_method(
-        request.method,
-        body,
-        level_one,
-        level_two,
-        level_three,
-        level_four,
-        level_five,
-    )
+    response = await service_model.get_service_method(request.state.input_context)
     return response
 
 
@@ -203,26 +158,10 @@ async def dynamic_path_level_five(
 @app.patch(route_config.Router.LEVEL_SIX)
 @app.delete(route_config.Router.LEVEL_SIX)
 async def dynamic_path_level_six(
-    level_one,
-    level_two,
-    level_three,
-    level_four,
-    level_five,
-    level_six,
     request: Request,
-    body: dict = Body(default={}),
 ):
     """Dynamic path level six."""
-    response = await service_model.get_service_method(
-        request.method,
-        body,
-        level_one,
-        level_two,
-        level_three,
-        level_four,
-        level_five,
-        level_six,
-    )
+    response = await service_model.get_service_method(request.state.input_context)
     return response
 
 
@@ -232,26 +171,8 @@ async def dynamic_path_level_six(
 @app.patch(route_config.Router.LEVEL_SEVEN)
 @app.delete(route_config.Router.LEVEL_SEVEN)
 async def dynamic_path_level_seven(
-    level_one,
-    level_two,
-    level_three,
-    level_four,
-    level_five,
-    level_six,
-    level_seven,
     request: Request,
-    body: dict = Body(default={}),
 ):
     """Dynamic path level seven."""
-    response = await service_model.get_service_method(
-        request.method,
-        body,
-        level_one,
-        level_two,
-        level_three,
-        level_four,
-        level_five,
-        level_six,
-        level_seven,
-    )
+    response = await service_model.get_service_method(request.state.input_context)
     return response

@@ -72,7 +72,7 @@ class AuthX:
         Returns:
             response (ResponseContext): response context.
         """
-        if self.is_path_excluded(context.model.get("path")):
+        if self.is_path_excluded(context.path):
             return ResponseContext()
         return self.decode(context.headers)
 

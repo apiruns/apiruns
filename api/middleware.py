@@ -37,7 +37,8 @@ async def get_context(request: Request) -> InputContext:
         body=body,
         headers=request.headers,
         method=request.method,
-        model={"path": request.url.path},
+        original_path=request.url.path,
+        model={},
     )
 
 
