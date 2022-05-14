@@ -1,72 +1,22 @@
-from dataclasses import dataclass
-from dataclasses import field
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
-from typing import Union
 
-import bcrypt
 import jwt
 from dacite import from_dict
 from fastapi import status
 
+from .models import AuthXConfig
+from .models import Queries
+from .models import User
 from api.configs import app_configs
-from api.datastructures import BaseModel
 from api.datastructures import InputContext
 from api.datastructures import ResponseContext
-from api.repositories import repository
 from api.validators import validate
 
 
-@dataclass(frozen=True)
-class AuthXConfig:
-    ON: bool
-    JWT_SECRET: str
-    JWT_EXP: int
-    JWT_ALGORITHM: str
-    MODEL: str
-    SIGN_IN_PATH: str
-    REGISTER_PATH: str
-
-
-@dataclass
-class User(BaseModel):
-    password: str = ""
-    email: str = ""
-    username: str = ""
-    verified: bool = field(default_factory=lambda: False)
-
-    def protected(self) -> None:
-        p = bcrypt.hashpw(self.password.encode("utf-8"), bcrypt.gensalt(10))
-        self.password = p.decode()
-
-    def check(self, password: str) -> bool:
-        p = password.encode("utf-8")
-        return bcrypt.checkpw(p, self.password.encode("utf-8"))
-
-    def to_response(self):
-        r = self.to_json()
-        del r["password"]
-        return r
-
-
-class Queries:
-    @staticmethod
-    async def find_user(model: str, email: str) -> Union[User, None]:
-        obj = await repository.find_one(model, {"username": email})
-        if obj:
-            return from_dict(User, obj)
-        return
-
-    @staticmethod
-    async def create_user(data: dict, model: str) -> Union[User, None]:
-        obj = await repository.create_one(data, model)
-        if obj:
-            return from_dict(User, obj)
-        return
-
-
 class AuthX:
+    """AuthX internal feature"""
 
     # errors
     HEADER_REQUIRED = {"error": "`Authorization` header is required"}
@@ -112,27 +62,55 @@ class AuthX:
         configs = app_configs.INTERNALS.get("AUTHX")
         self.configs = from_dict(AuthXConfig, configs)
 
-    async def handle(self, context: InputContext):
-        return self.authorization(context.headers)
+    async def handle(self, context: InputContext) -> ResponseContext:
+        """Handle feature entrypoint.
+
+        Args:
+            context (InputContext): Input context.
+
+        Returns:
+            response (ResponseContext): response context.
+        """
+        return self.decode(context.headers)
 
     def is_on(self) -> bool:
+        """Feature is On or Off.
+
+        Returns:
+            bool: return true is ON or false is OFF.
+        """
         return self.configs.ON
 
-    def from_config(self, config: dict) -> None:
-        self.configs = from_dict(AuthXConfig, config)
-        return self.configs
-
     def encode(self, **kwargs: dict) -> str:
+        """Create JWT token.
+
+        Args:
+            kwargs: Extra args for payload.
+
+        Returns:
+            str: Token encode.
+        """
         exp = datetime.now(tz=timezone.utc) + timedelta(seconds=self.configs.JWT_EXP)
         default = {"exp": exp, "iat": datetime.now(tz=timezone.utc)}
-        token_bytes = jwt.encode(
+        token = jwt.encode(
             {**kwargs, **default},
             self.configs.JWT_SECRET,
             algorithm=self.configs.JWT_ALGORITHM,
         )
-        return token_bytes
+        return token
 
     def decode(self, headers: dict) -> ResponseContext:
+        """Decode JWT token.
+
+        Args:
+            headers (dict): request headers.
+
+        Raises:
+            ValueError: Header invalid.
+
+        Returns:
+            ResponseContext: response context.
+        """
         authorization_h = headers.get("Authorization")
         if not authorization_h:
             return ResponseContext(
@@ -163,10 +141,20 @@ class AuthX:
                 errors=self.TOKEN_INVALID, status_code=status.HTTP_401_UNAUTHORIZED
             )
 
-    def authorization(self, headers: dict) -> ResponseContext:
-        return self.decode(headers)
-
     async def authentication(self, payload: dict) -> ResponseContext:
+        """Authenticate user.
+
+        Args:
+            payload (dict): payload request.
+            example:
+                {
+                    "username": "user",
+                    "password": "secret"
+                }
+
+        Returns:
+            ResponseContext: response context.
+        """
         errors = validate.data_is_valid(self.CERBERUS_SIGN_IN_SCHEMA, payload)
         if errors:
             return ResponseContext(
@@ -192,6 +180,19 @@ class AuthX:
         )
 
     async def create_user(self, payload: dict) -> ResponseContext:
+        """Create a new user.
+
+        Args:
+            payload (dict): payload request.
+            example:
+                {
+                    "username": "user",
+                    "password": "secret"
+                }
+
+        Returns:
+            ResponseContext: response context.
+        """
         errors = validate.data_is_valid(self.CERBERUS_USER_SCHEMA, payload)
         if errors:
             return ResponseContext(
