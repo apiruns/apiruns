@@ -1,5 +1,4 @@
 import uuid
-from api.utils.common import get_or_create_model
 
 from fastapi import HTTPException
 from fastapi import status
@@ -8,13 +7,14 @@ from fastapi.responses import JSONResponse
 from fastapi.responses import Response
 
 from api.configs import app_configs
+from api.configs import route_config
 from api.configs import route_config as rt
 from api.datastructures import InputContext
 from api.repositories import repository
+from api.utils.common import get_or_create_model
 from api.utils.node import build_path_from_params
 from api.utils.node import paths_with_slash
 from api.validators import validate
-from api.configs import route_config
 
 
 class ServiceModelMongo:
