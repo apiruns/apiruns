@@ -2,7 +2,7 @@ import json
 
 from fastapi import Request
 
-from api.datastructures import InputContext
+from api.datastructures import RequestContext
 from api.datastructures import ResponseContext
 from api.features.internals import features
 from api.features.internals import InternalFeature
@@ -23,17 +23,17 @@ async def validate_body(request: Request) -> dict:
         return {}
 
 
-async def get_context(request: Request) -> InputContext:
+async def get_context(request: Request) -> RequestContext:
     """Get context from request.
 
     Args:
         request (Request): Request object.
 
     Returns:
-        InputContext: Input context.
+        RequestContext: Input context.
     """
     body = await validate_body(request)
-    return InputContext(
+    return RequestContext(
         body=body,
         headers=request.headers,
         method=request.method,
@@ -42,16 +42,16 @@ async def get_context(request: Request) -> InputContext:
     )
 
 
-async def get_internal_feature(context: InputContext) -> ResponseContext:
+async def get_internal_feature(context: RequestContext) -> ResponseContext:
     """Get internal feature.
 
     Args:
-        context (InputContext): input context.
+        context (RequestContext): input context.
 
     Returns:
         ResponseContext: response context.
     """
     auth = features.get(InternalFeature.AUTHX)
     if auth.is_on():
-        return ResponseContext()
-    return await auth.handle(context)
+        return await auth.handle(context)
+    return ResponseContext()

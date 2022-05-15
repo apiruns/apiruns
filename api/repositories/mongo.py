@@ -1,7 +1,10 @@
 from typing import List
 from typing import Union
 
+from dacite import from_dict
+
 from api.configs import app_configs
+from api.datastructures import Model
 from api.engines import db
 
 
@@ -83,7 +86,6 @@ class MongoRepository:
             int: Document modified count.
         """
         response = await db[model].update_one({ID_FIELD: _id}, {"$set": data})
-        print(response.modified_count)
         return response.modified_count
 
     @staticmethod
@@ -114,7 +116,7 @@ class MongoRepository:
         return rows > 0
 
     @staticmethod
-    async def exist_path_or_model(path: str, model: str) -> bool:
+    async def exist_path_or_model(path: str, model: str) -> Union[None, Model]:
         """Validate existence of the path or model in admin model.
 
         Args:
@@ -126,6 +128,8 @@ class MongoRepository:
         response = await db[ADMIN_MODEL].find_one(
             {"$or": [{"path": path}, {"model": model}]}, {"_id": 0}
         )
+        if response:
+            return from_dict(data_class=Model, data=response)
         return response
 
     @staticmethod
@@ -143,7 +147,7 @@ class MongoRepository:
         return row
 
     @staticmethod
-    async def delete_admin_model(body: dict) -> int:
+    async def delete_admin_model(model: dict) -> int:
         """Delete a admin model.
 
         Args:
@@ -152,9 +156,7 @@ class MongoRepository:
         Returns:
             dict: model admin.
         """
-        response = await db[ADMIN_MODEL].delete_one(
-            {body.get("key"): body.get("value")}
-        )
+        response = await db[ADMIN_MODEL].delete_one({"name": model})
         return response.deleted_count
 
     @staticmethod
@@ -168,7 +170,7 @@ class MongoRepository:
         return rows
 
     @staticmethod
-    async def model_by_path(path: str) -> dict:
+    async def model_by_path(path: str) -> Union[None, Model]:
         """Look for admin model by path url.
 
         Args:
@@ -177,8 +179,10 @@ class MongoRepository:
         Returns:
             dict: admin model
         """
-        row = await db[ADMIN_MODEL].find_one({"path": path}, {"_id": 0})
-        return row
+        response = await db[ADMIN_MODEL].find_one({"path": path}, {"_id": 0})
+        if response:
+            return from_dict(data_class=Model, data=response)
+        return response
 
     @staticmethod
     async def find_one_or_many(model, _id) -> Union[dict, List[dict]]:
