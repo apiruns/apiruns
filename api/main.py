@@ -5,11 +5,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.configs import app_configs
 from api.configs import route_config
-from api.features.internals import features
-from api.features.internals import InternalFeature
+from api.controllers.admin import AdminController
+from api.controllers.core import CoreController
+from api.controllers.feature import AuthXController
 from api.middleware import get_context
 from api.middleware import get_internal_feature
-from api.services import service_model
 
 app = FastAPI()
 app.add_middleware(
@@ -43,7 +43,7 @@ def ping() -> dict:
 @app.post(route_config.RouterAdmin.ADMIN)
 async def create_model(request: Request):
     """Create a model."""
-    response = await service_model.create_model(request.state.input_context)
+    response = await AdminController.create_model(request.state.input_context)
     return response
 
 
@@ -51,7 +51,7 @@ async def create_model(request: Request):
 @app.get(route_config.RouterAdmin.ADMIN)
 async def list_models():
     """List models."""
-    response = await service_model.list_models()
+    response = await AdminController.list_models()
     return response
 
 
@@ -59,20 +59,14 @@ async def list_models():
 @app.post(route_config.RouterAdmin.AUTHX_REGISTER)
 async def create_users(request: Request):
     """Create users."""
-    context = request.state.input_context
-    auth = features.get(InternalFeature.AUTHX)
-    response = await auth.create_user(context.body)
-    return response.json_response()
+    return await AuthXController.create_user(request.state.input_context)
 
 
 # Admin users sign in
 @app.post(route_config.RouterAdmin.AUTHX_SIGN_IN)
 async def users_sign(request: Request):
     """Users sign in."""
-    context = request.state.input_context
-    auth = features.get(InternalFeature.AUTHX)
-    response = await auth.authentication(context.body)
-    return response.json_response()
+    return await AuthXController.users_sign(request.state.input_context)
 
 
 # Path root.
@@ -91,7 +85,7 @@ async def dynamic_path_level_root(
 @app.post(route_config.Router.LEVEL_ONE)
 async def dynamic_path_level_one(request: Request, level_one: str):
     """Dynamic path level one."""
-    response = await service_model.get_service_method(request.state.input_context)
+    response = await CoreController.handle(request.state.input_context)
     return response
 
 
@@ -105,7 +99,7 @@ async def dynamic_path_level_two(
     request: Request,
 ):
     """Dynamic path level two."""
-    response = await service_model.get_service_method(request.state.input_context)
+    response = await CoreController.handle(request.state.input_context)
     return response
 
 
@@ -119,7 +113,7 @@ async def dynamic_path_level_three(
     request: Request,
 ):
     """Dynamic path level three."""
-    response = await service_model.get_service_method(request.state.input_context)
+    response = await CoreController.handle(request.state.input_context)
     return response
 
 
@@ -133,7 +127,7 @@ async def dynamic_path_level_four(
     request: Request,
 ):
     """Dynamic path level four."""
-    response = await service_model.get_service_method(request.state.input_context)
+    response = await CoreController.handle(request.state.input_context)
     return response
 
 
@@ -147,7 +141,7 @@ async def dynamic_path_level_five(
     request: Request,
 ):
     """Dynamic path level five."""
-    response = await service_model.get_service_method(request.state.input_context)
+    response = await CoreController.handle(request.state.input_context)
     return response
 
 
@@ -161,7 +155,7 @@ async def dynamic_path_level_six(
     request: Request,
 ):
     """Dynamic path level six."""
-    response = await service_model.get_service_method(request.state.input_context)
+    response = await CoreController.handle(request.state.input_context)
     return response
 
 
@@ -174,5 +168,5 @@ async def dynamic_path_level_seven(
     request: Request,
 ):
     """Dynamic path level seven."""
-    response = await service_model.get_service_method(request.state.input_context)
+    response = await CoreController.handle(request.state.input_context)
     return response

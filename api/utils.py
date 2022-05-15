@@ -1,21 +1,8 @@
 import uuid
 from datetime import date
 from datetime import datetime
-from typing import List
 from typing import Tuple
 from typing import Union
-
-
-def singleton(class_):
-    """Singleton"""
-    instances = {}
-
-    def getinstance(*args, **kwargs):
-        if class_ not in instances:
-            instances[class_] = class_(*args, **kwargs)
-        return instances[class_]
-
-    return getinstance
 
 
 def json_serial(obj):

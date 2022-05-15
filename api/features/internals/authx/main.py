@@ -9,11 +9,11 @@ from fastapi import status
 from .models import AuthXConfig
 from .models import Queries
 from .models import User
+from .serializers import AuthXSerializer
 from api.configs import app_configs
 from api.configs import route_config
-from api.datastructures import InputContext
+from api.datastructures import RequestContext
 from api.datastructures import ResponseContext
-from api.validators import validate
 
 
 class AuthX:
@@ -29,45 +29,15 @@ class AuthX:
     USER_NOT_CREATED = {"error": "user not created"}
     AUTH_FAILED = {"error": "username or password wrong"}
 
-    # validations
-    CERBERUS_USER_SCHEMA = {
-        "email": {
-            "required": False,
-            "type": "string",
-            "regex": r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$",
-        },
-        "username": {
-            "required": True,
-            "type": "string",
-            "regex": r"^[a-zA-Z0-9_]*$",
-        },
-        "password": {
-            "type": "string",
-            "required": True,
-            "regex": r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{6,20}$",  # no-qa
-        },
-    }
-    CERBERUS_SIGN_IN_SCHEMA = {
-        "username": {
-            "type": "string",
-            "regex": r"^[a-zA-Z0-9_]*$",
-            "required": True,
-        },
-        "password": {
-            "required": True,
-            "type": "string",
-        },
-    }
-
     def __init__(self):
         configs = app_configs.INTERNALS.get("AUTHX")
         self.configs = from_dict(AuthXConfig, configs)
 
-    async def handle(self, context: InputContext) -> ResponseContext:
+    async def handle(self, context: RequestContext) -> ResponseContext:
         """Handle feature entrypoint.
 
         Args:
-            context (InputContext): Input context.
+            context (RequestContext): Input context.
 
         Returns:
             response (ResponseContext): response context.
@@ -174,7 +144,7 @@ class AuthX:
         Returns:
             ResponseContext: response context.
         """
-        errors = validate.data_is_valid(self.CERBERUS_SIGN_IN_SCHEMA, payload)
+        errors = AuthXSerializer.validate_login(payload)
         if errors:
             return ResponseContext(
                 status_code=status.HTTP_400_BAD_REQUEST, errors=errors
@@ -212,7 +182,7 @@ class AuthX:
         Returns:
             ResponseContext: response context.
         """
-        errors = validate.data_is_valid(self.CERBERUS_USER_SCHEMA, payload)
+        errors = AuthXSerializer.validate_login(payload)
         if errors:
             return ResponseContext(
                 status_code=status.HTTP_400_BAD_REQUEST, errors=errors

@@ -1,6 +1,6 @@
 from typing import Union
 
-from api.datastructures import InputContext
+from api.datastructures import RequestContext
 from api.datastructures import ResponseContext
 from api.features.internals.authx import AuthX
 
@@ -14,7 +14,7 @@ class InternalFeature:
 features = {InternalFeature.AUTHX: AuthX()}
 
 
-async def internal_handle(context: InputContext) -> Union[ResponseContext, None]:
+async def internal_handle(context: RequestContext) -> Union[ResponseContext, None]:
 
     ctx_response = None
     for feature in features.values():
