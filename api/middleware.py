@@ -38,7 +38,7 @@ async def get_context(request: Request) -> RequestContext:
         headers=request.headers,
         method=request.method,
         original_path=request.url.path,
-        model={},
+        model=None,
     )
 
 

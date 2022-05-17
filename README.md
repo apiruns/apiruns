@@ -73,8 +73,7 @@ POST `http://localhost:8000/admin/models/`
         "level": {
             "type": "float",
         }
-    },
-    "model": "users"
+    }
 }
 ```
 
@@ -106,7 +105,7 @@ POST `http://localhost:8000/admin/models/`
             "type": "float"
         }
     },
-    "model": "users",
+    "name": "model_c785e69e-b0e0-4fcb-a946-85f6c9f6some",
 }
 ```
 

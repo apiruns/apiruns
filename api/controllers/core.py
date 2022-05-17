@@ -1,4 +1,3 @@
-from fastapi import Response
 from fastapi import status
 from fastapi.responses import JSONResponse
 
@@ -14,6 +13,12 @@ class CoreController:
     @classmethod
     async def handle(cls, context: RequestContext) -> JSONResponse:
         """Define the service to use according to the http method."""
+        if not context.resource_id and context.method in rt.HTTPMethod.modifiable():
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content={"error": f"Resource `{context.original_path}` not found !"},
+            )
+
         repositories = {
             rt.HTTPMethod.POST: cls.post,
             rt.HTTPMethod.GET: cls.get,
@@ -28,7 +33,33 @@ class CoreController:
                 content={"error": "Method Not Allowed"},
             )
 
-        return await service(context)
+        model = await repository.model_by_path(context.path)
+        if not model:
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content={"error": f"Resource `{context.original_path}` not found !"},
+            )
+        context.model = model
+        response = await service(context)
+        return cls.custom_response(context, response)
+
+    @classmethod
+    def custom_response(cls, context, response) -> JSONResponse:
+        """Response custom.
+
+        Args:
+            context (RequestContext): request context.
+            response (JSONResponse): json response.
+
+        Returns:
+            JSONResponse: response.
+        """
+        custom_status = context.model.status_code.get(context.method)
+        if context.model.status_code and custom_status:
+            response.status_code = custom_status
+            return response
+
+        return response
 
     @classmethod
     async def get(cls, context: RequestContext) -> JSONResponse:
@@ -40,13 +71,11 @@ class CoreController:
         Returns:
             JSONResponse: response.
         """
-        model = await repository.model_by_path(context.path)
-        if model:
-            response = await repository.find_one_or_many(
-                model.name, context.resource_id
-            )
-            if response is not None:
-                return response
+        response = await repository.find_one_or_many(
+            context.model.name, context.resource_id
+        )
+        if response is not None:
+            return JSONResponse(content=response)
 
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -69,21 +98,12 @@ class CoreController:
                 content={"error": f"Resource `{context.original_path}` not found !"},
             )
 
-        model = await repository.model_by_path(context.path)
-        if model:
-            valid, data = CoreSerializer.validate(context.body, model.schema)
-            if not valid:
-                return JSONResponse(
-                    status_code=status.HTTP_400_BAD_REQUEST, content=data
-                )
+        valid, data = CoreSerializer.validate(context.body, context.model.schema)
+        if not valid:
+            return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=data)
 
-            obj = await repository.create_one(data, model.name)
-            return JSONResponse(status_code=status.HTTP_201_CREATED, content=obj)
-
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"error": f"Resource `{context.original_path}` not found !"},
-        )
+        obj = await repository.create_one(data, context.model.name)
+        return JSONResponse(status_code=status.HTTP_201_CREATED, content=obj)
 
     @classmethod
     async def put(cls, context: RequestContext) -> JSONResponse:
@@ -95,20 +115,11 @@ class CoreController:
         Returns:
             JSONResponse: response.
         """
-        model = await repository.model_by_path(context.path)
-        if model:
-            valid, data = CoreSerializer.validate_update(context.body, model.schema)
-            if not valid:
-                return JSONResponse(
-                    status_code=status.HTTP_400_BAD_REQUEST, content=data
-                )
-            await repository.update_one(model.name, context.resource_id, data)
-            return Response(status_code=status.HTTP_204_NO_CONTENT)
-
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"error": f"Resource `{context.original_path}` not found !"},
-        )
+        valid, data = CoreSerializer.validate_update(context.body, context.model.schema)
+        if not valid:
+            return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=data)
+        await repository.update_one(context.model.name, context.resource_id, data)
+        return JSONResponse(status_code=status.HTTP_204_NO_CONTENT, content="")
 
     @classmethod
     async def delete(cls, context: RequestContext) -> JSONResponse:
@@ -120,12 +131,5 @@ class CoreController:
         Returns:
             JSONResponse: response.
         """
-        model = await repository.model_by_path(context.path)
-        if model:
-            await repository.delete_one(model.name, context.resource_id)
-            return Response(status_code=status.HTTP_204_NO_CONTENT)
-
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"error": f"Resource `{context.original_path}` not found !"},
-        )
+        await repository.delete_one(context.model.name, context.resource_id)
+        return JSONResponse(status_code=status.HTTP_204_NO_CONTENT, content="")

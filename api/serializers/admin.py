@@ -18,7 +18,7 @@ class AdminSerializer(Serializer):
             body (dict): body request.
 
         Returns:
-            Tuple[bool, Any]: is valid and errors or model
+            Tuple[bool, Any]: is valid and errors or model.
         """
         valid, errors = cls.validate_model(body)
         if not valid:

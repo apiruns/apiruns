@@ -72,3 +72,31 @@ class HTTPMethod:
     PUT = "PUT"
     PATCH = "PATCH"
     DELETE = "DELETE"
+
+    @classmethod
+    def to_list(cls):
+        """Return list of methods.
+
+        Returns:
+            list: list of methods.
+        """
+        return [
+            cls.GET,
+            cls.POST,
+            cls.PUT,
+            cls.PATCH,
+            cls.DELETE,
+        ]
+
+    @classmethod
+    def modifiable(cls):
+        """Return modifiable method.
+
+        Returns:
+            list: list of methods.
+        """
+        return [
+            cls.PUT,
+            cls.PATCH,
+            cls.DELETE,
+        ]
