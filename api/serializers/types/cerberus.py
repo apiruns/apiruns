@@ -4,6 +4,10 @@ from typing import Tuple
 from cerberus import Validator
 from cerberus.schema import SchemaError
 
+from .validations import status_code_allowed
+from .validations import upper
+from api.configs import route_config
+
 
 ADMIN_SCHEMA = {
     "path": {
@@ -19,6 +23,17 @@ ADMIN_SCHEMA = {
         "regex": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
     },
     "schema": {"type": "dict", "required": True, "empty": False, "minlength": 1},
+    "status_code": {
+        "type": "dict",
+        "required": False,
+        "empty": False,
+        "keysrules": {
+            "type": "string",
+            "allowed": route_config.HTTPMethod.to_list(),
+            "coerce": (str, upper()),
+        },
+        "valuesrules": {"type": "integer", "allowed": status_code_allowed()},
+    },
 }
 
 ADMIN_DELETE_PATH = {
@@ -67,7 +82,7 @@ class Cerberus:
         Returns:
             dict: empty if was OK or errors if fail.
         """
-        v = Validator(schema)
+        v = Validator(schema, purge_unknown=True)
         v.validate(body)
         return v.errors
 

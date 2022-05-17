@@ -43,6 +43,7 @@ class Model(BaseModel):
     path: str = "/"
     name: str = f"model_{str(uuid.uuid4())}"
     schema: dict = field(default_factory=dict)
+    status_code: dict = field(default_factory=dict)
 
     def __post_init__(self):
         self.name = self.name.strip().lower()
@@ -68,15 +69,15 @@ class ResponseContext:
         )
 
 
-@dataclass(frozen=True)
+@dataclass
 class RequestContext:
     """Request Context"""
 
-    model: dict
     method: str
     headers: dict
     body: Any
     original_path: str
+    model: Union[Model, None]
 
     @property
     def path(self) -> str:
