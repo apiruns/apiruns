@@ -76,9 +76,9 @@ POST `http://localhost:8000/admin/models/`
 }
 ```
 
-* path: is the url that your new resource, must be unique.
-* schema: is the data structure to be persisted in the new resource. by default it is based on [cerberus](https://docs.python-cerberus.org/en/stable/index.html).
-* model: is the name that identifies your resource. must be unique.
+* **path:** is the url that your new resource, must be unique.
+* **schema:** is the data structure to be persisted in the new resource. by default it is based on [cerberus](https://docs.python-cerberus.org/en/stable/index.html).
+* **name:** is the model name that identifies your resource. must be unique, this parameter is `optional`.
 
 *Response 201*
 
@@ -258,4 +258,75 @@ GET `http://localhost:8000/admin/models/`
         "name": "model_c077e69e-b0e0-4fcb-a946-85f6c9f6cero",
     }
 ]
+```
+
+### Status code custom.
+
+POST `http://localhost:8000/admin/models/`
+
+*Request*
+```json
+{
+    "path": "/inventory",
+    "schema": {
+        "username": {
+            "type": "string",
+            "required": true
+        },
+        "age": {
+            "type": "integer",
+            "required": true
+        },
+        "is_admin": {
+            "type": "boolean",
+            "required": true
+        },
+        "level": {
+            "type": "float",
+        }
+    },
+    "status_code": {
+        "get": 200,
+        "post": 201,
+        "put": 200,
+        "patch": 400,
+        "delete": 404
+    }
+}
+```
+* **status_code:** customize the status codes to return for each http method.
+
+*Response 201*
+
+```json
+{
+    "public_id": "c056e69e-b0e0-4fcb-a946-85f6c9f6caed",
+    "created_at": "2022-03-23T00:09:45.708193+00:00",
+    "updated_at": null,
+    "deleted_at": null,
+    "path": "/inventory",
+    "schema": {
+        "username": {
+            "type": "string",
+            "required": true
+        },
+        "age": {
+            "type": "integer",
+        },
+        "is_admin": {
+            "type": "boolean",
+        },
+        "level": {
+            "type": "float"
+        }
+    },
+    "name": "model_c077e69e-b0e0-4fcb-a946-85f6c9f6cero",
+    "status_code": {
+        "get": 200,
+        "post": 201,
+        "put": 200,
+        "patch": 400,
+        "delete": 404
+    }
+}
 ```

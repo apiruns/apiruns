@@ -77,7 +77,8 @@ class RequestContext:
     headers: dict
     body: Any
     original_path: str
-    model: Union[Model, None]
+    model: Union[Model, None] = None
+    extras: dict = field(default_factory=dict)
 
     @property
     def path(self) -> str:

@@ -24,10 +24,12 @@ app.add_middleware(
 @app.middleware("http")
 async def app_entry(request: Request, call_next):
     """Request handle middleware"""
-    request.state.input_context = await get_context(request)
-    resp = await get_internal_feature(request.state.input_context)
+    context = await get_context(request)
+    context, resp = await get_internal_feature(context)
     if resp.errors:
         return resp.json_response()
+
+    request.state.input_context = context
     response = await call_next(request)
     return response
 

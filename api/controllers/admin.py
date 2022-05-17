@@ -32,6 +32,12 @@ class AdminController:
                 content={"error": "the path already exists, is admin path."},
             )
 
+        # TODO: Move to internal feature handle.
+        if "username" in context.extras:
+            user = context.extras.get("username")
+            data.name = f"{user}_{data.name}"
+            data.path = f"/@{user}{data.path}"
+
         model = await repository.exist_path_or_model(data.path, data.name)
         if model:
             name = "path" if model.path == data.path else "model"

@@ -22,7 +22,7 @@ PATH_SECTION = 7
 # Features
 INTERNALS = {
     "AUTHX": {
-        "ON": os.environ.get("AUTHX", False),
+        "ON": bool(os.environ.get("AUTHX", False)),
         "JWT_SECRET": os.environ.get("AUTHX_JWT_SECRET", "SUPER_SECRET"),
         "JWT_EXP": int(os.environ.get("AUTHX_JWT_EXP", 3600)),
         "JWT_ALGORITHM": "HS256",
