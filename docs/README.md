@@ -72,8 +72,7 @@ POST `http://localhost:8000/admin/models/`
         "level": {
             "type": "float",
         }
-    },
-    "model": "users"
+    }
 }
 ```
 
@@ -105,7 +104,7 @@ POST `http://localhost:8000/admin/models/`
             "type": "float"
         }
     },
-    "model": "users",
+    "name": "model_c077e69e-b0e0-4fcb-a946-85f6c9f6cero",
 }
 ```
 
@@ -228,7 +227,7 @@ DELETE `http://localhost:8000/users/422594e5-ad62-4d56-837e-eab6270bf0f5/`
 
 ### List created resources.
 
-GET `http://localhost:8000/admin/nodes/`
+GET `http://localhost:8000/admin/models/`
 
 *Request*
 ```json
@@ -256,7 +255,7 @@ GET `http://localhost:8000/admin/nodes/`
                 "type": "float",
             }
         },
-        "model": "users",
+        "name": "model_c077e69e-b0e0-4fcb-a946-85f6c9f6cero",
     }
 ]
 ```
