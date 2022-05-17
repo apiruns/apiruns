@@ -32,6 +32,12 @@ class AdminController:
                 content={"error": "the path already exists, is admin path."},
             )
 
+        # TODO: Move to internal feature handle.
+        if "username" in context.extras:
+            user = context.extras.get("username")
+            data.name = f"{user}_{data.name}"
+            data.path = f"/@{user}{data.path}"
+
         model = await repository.exist_path_or_model(data.path, data.name)
         if model:
             name = "path" if model.path == data.path else "model"
@@ -39,11 +45,6 @@ class AdminController:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 content={"error": f"the {name} already exists."},
             )
-
-        # TODO: Move to internal feature handle.
-        if "username" in context.extras:
-            user = context.extras.get("username")
-            data.name = f"{user}_{data.name}"
 
         response = await repository.create_admin_model(data.to_json())
         return JSONResponse(status_code=status.HTTP_201_CREATED, content=response)

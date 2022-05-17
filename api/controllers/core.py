@@ -13,11 +13,6 @@ class CoreController:
     @classmethod
     async def handle(cls, context: RequestContext) -> JSONResponse:
         """Define the service to use according to the http method."""
-        if not context.resource_id and context.method in rt.HTTPMethod.modifiable():
-            return JSONResponse(
-                status_code=status.HTTP_404_NOT_FOUND,
-                content={"error": f"Resource `{context.original_path}` not found !"},
-            )
 
         repositories = {
             rt.HTTPMethod.POST: cls.post,
@@ -39,6 +34,13 @@ class CoreController:
                 status_code=status.HTTP_404_NOT_FOUND,
                 content={"error": f"Resource `{context.original_path}` not found !"},
             )
+
+        if not context.resource_id and context.method in rt.HTTPMethod.modifiable():
+            return JSONResponse(
+                status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
+                content={"error": "Method Not Allowed"},
+            )
+
         context.model = model
         response = await service(context)
         return cls.custom_response(context, response)

@@ -19,7 +19,7 @@ class AuthXSerializer(Serializer):
         "password": {
             "type": "string",
             "required": True,
-            "regex": r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{6,20}$",  # no-qa
+            "regex": r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{6,20}$",  # noqa
         },
     }
     CERBERUS_SIGN_IN_SCHEMA = {

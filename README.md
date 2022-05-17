@@ -79,7 +79,7 @@ POST `http://localhost:8000/admin/models/`
 
 * path: is the url that your new resource, must be unique.
 * schema: is the data structure to be persisted in the new resource. by default it is based on [cerberus](https://docs.python-cerberus.org/en/stable/index.html).
-* model: is the name that identifies your resource. must be unique.
+* name: is the model name that identifies your resource. must be unique, this parameter is `optional`.
 
 *Response 201*
 
