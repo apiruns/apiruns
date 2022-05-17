@@ -1,4 +1,5 @@
 import json
+from typing import Tuple
 
 from fastapi import Request
 
@@ -38,11 +39,12 @@ async def get_context(request: Request) -> RequestContext:
         headers=request.headers,
         method=request.method,
         original_path=request.url.path,
-        model=None,
     )
 
 
-async def get_internal_feature(context: RequestContext) -> ResponseContext:
+async def get_internal_feature(
+    context: RequestContext,
+) -> Tuple[RequestContext, ResponseContext]:
     """Get internal feature.
 
     Args:
@@ -53,5 +55,8 @@ async def get_internal_feature(context: RequestContext) -> ResponseContext:
     """
     auth = features.get(InternalFeature.AUTHX)
     if auth.is_on():
-        return await auth.handle(context)
-    return ResponseContext()
+        response = await auth.handle(context)
+        if response.content:
+            context.extras = response.content
+        return context, response
+    return context, ResponseContext()

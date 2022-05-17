@@ -117,10 +117,10 @@ class AuthX:
             )
 
         try:
-            jwt.decode(
+            payload = jwt.decode(
                 t_value, self.configs.JWT_SECRET, algorithms=self.configs.JWT_ALGORITHM
             )
-            return ResponseContext()
+            return ResponseContext(content=payload)
         except jwt.ExpiredSignatureError:
             return ResponseContext(
                 errors=self.TOKEN_EXPIRED, status_code=status.HTTP_401_UNAUTHORIZED

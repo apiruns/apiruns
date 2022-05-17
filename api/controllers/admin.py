@@ -40,6 +40,11 @@ class AdminController:
                 content={"error": f"the {name} already exists."},
             )
 
+        # TODO: Move to internal feature handle.
+        if "username" in context.extras:
+            user = context.extras.get("username")
+            data.name = f"{user}_{data.name}"
+
         response = await repository.create_admin_model(data.to_json())
         return JSONResponse(status_code=status.HTTP_201_CREATED, content=response)
 
