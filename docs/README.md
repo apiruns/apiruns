@@ -330,3 +330,100 @@ POST `http://localhost:8000/admin/models/`
     }
 }
 ```
+
+
+### Static Model.
+
+POST `http://localhost:8000/admin/models/`
+
+*Request*
+```json
+{
+    "path": "/inventory",
+    "schema": {
+        "username": {
+            "type": "string",
+            "required": true
+        },
+        "age": {
+            "type": "integer",
+            "required": true
+        },
+        "is_admin": {
+            "type": "boolean",
+            "required": true
+        },
+        "level": {
+            "type": "float",
+        }
+    },
+    "static": {
+        "all": {"this": "mock"}
+    }
+}
+```
+* **static:** this feature allows to return a static json according to the defined method, in this example it returns the same json for `all` the methods.
+
+*Response 201*
+
+```json
+{
+    "public_id": "c056e69e-b0e0-4fcb-a946-85f6c9f6caed",
+    "created_at": "2022-03-23T00:09:45.708193+00:00",
+    "updated_at": null,
+    "deleted_at": null,
+    "path": "/inventory",
+    "schema": {
+        "username": {
+            "type": "string",
+            "required": true
+        },
+        "age": {
+            "type": "integer",
+        },
+        "is_admin": {
+            "type": "boolean",
+        },
+        "level": {
+            "type": "float"
+        }
+    },
+    "name": "model_c077e69e-b0e0-4fcb-a946-85f6c9f6cero",
+    "static": {
+        "all": {"this": "mock"}
+    }
+}
+```
+
+Example by method:
+
+POST `http://localhost:8000/admin/models/`
+
+*Request*
+```json
+{
+    "path": "/inventory",
+    "schema": {
+        "username": {
+            "type": "string",
+            "required": true
+        },
+        "age": {
+            "type": "integer",
+            "required": true
+        },
+        "is_admin": {
+            "type": "boolean",
+            "required": true
+        },
+        "level": {
+            "type": "float",
+        }
+    },
+    "static": {
+        "get": {"this": "mock get"},
+        "post": {"this": "mock post"},
+        "put": {"this": "mock put"},
+    }
+}
+```
