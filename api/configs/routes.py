@@ -124,6 +124,6 @@ class HTTPMethod:
             cls.GET: 200,
             cls.POST: 201,
             cls.PUT: 200,
-            cls.PATCH: 204,
+            cls.PATCH: 200,
             cls.DELETE: 204,
         }.get(method)

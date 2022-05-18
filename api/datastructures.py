@@ -61,6 +61,8 @@ class Model(BaseModel):
             JSONResponse: response.
         """
         content = self.static.get(method)
+        if not content:
+            content = self.static.get(route_config.HTTPMethod.ALL)
         return JSONResponse(
             status_code=route_config.HTTPMethod.get_status_code(method),
             content=content,
