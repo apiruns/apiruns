@@ -85,6 +85,9 @@ async def dynamic_path_level_root(
 # Path level one.
 @app.get(route_config.Router.LEVEL_ONE)
 @app.post(route_config.Router.LEVEL_ONE)
+@app.put(route_config.Router.LEVEL_ONE)
+@app.patch(route_config.Router.LEVEL_ONE)
+@app.delete(route_config.Router.LEVEL_ONE)
 async def dynamic_path_level_one(request: Request, level_one: str):
     """Dynamic path level one."""
     response = await CoreController.handle(request.state.input_context)

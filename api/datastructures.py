@@ -11,6 +11,7 @@ from typing import Union
 from fastapi import status
 from fastapi.responses import JSONResponse
 
+from api.configs import route_config
 from api.utils import json_serial
 from api.utils import paths_without_slash
 from api.utils import split_uuid_path
@@ -44,10 +45,26 @@ class Model(BaseModel):
     name: str = f"model_{str(uuid.uuid4())}"
     schema: dict = field(default_factory=dict)
     status_code: dict = field(default_factory=dict)
+    static: Union[None, dict] = None
 
     def __post_init__(self):
         self.name = self.name.strip().lower()
         self.path = paths_without_slash(self.path.strip().lower())
+
+    def static_response(self, method) -> JSONResponse:
+        """Response from static.
+
+        Args:
+            method (str): method http.
+
+        Returns:
+            JSONResponse: response.
+        """
+        content = self.static.get(method)
+        return JSONResponse(
+            status_code=route_config.HTTPMethod.get_status_code(method),
+            content=content,
+        )
 
 
 @dataclass(frozen=True)
