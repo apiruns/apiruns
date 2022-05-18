@@ -34,6 +34,10 @@ class CoreController:
                 status_code=status.HTTP_404_NOT_FOUND,
                 content={"error": f"Resource `{context.original_path}` not found !"},
             )
+        context.model = model
+
+        if model.static:
+            return cls.static_response(context)
 
         if not context.resource_id and context.method in rt.HTTPMethod.modifiable():
             return JSONResponse(
@@ -41,9 +45,23 @@ class CoreController:
                 content={"error": "Method Not Allowed"},
             )
 
-        context.model = model
         response = await service(context)
         return cls.custom_response(context, response)
+
+    @classmethod
+    def static_response(cls, context) -> JSONResponse:
+        if rt.HTTPMethod.ALL in context.model.static:
+            static_response = context.model.static_response(context.method)
+            return cls.custom_response(context, static_response)
+
+        if context.method not in context.model.static:
+            return JSONResponse(
+                status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
+                content={"error": "Method Not Allowed"},
+            )
+
+        static_response = context.model.static_response(context.method)
+        return cls.custom_response(context, static_response)
 
     @classmethod
     def custom_response(cls, context, response) -> JSONResponse:

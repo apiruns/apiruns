@@ -73,6 +73,9 @@ class HTTPMethod:
     PATCH = "PATCH"
     DELETE = "DELETE"
 
+    # Other
+    ALL = "ALL"
+
     @classmethod
     def to_list(cls):
         """Return list of methods.
@@ -100,3 +103,27 @@ class HTTPMethod:
             cls.PATCH,
             cls.DELETE,
         ]
+
+    @classmethod
+    def static(cls):
+        """Return static method.
+
+        Returns:
+            list: list of methods.
+        """
+        return cls.to_list() + [cls.ALL]
+
+    @classmethod
+    def get_status_code(cls, method):
+        """Return status code from method.
+
+        Returns:
+            list: status code default.
+        """
+        return {
+            cls.GET: 200,
+            cls.POST: 201,
+            cls.PUT: 200,
+            cls.PATCH: 200,
+            cls.DELETE: 204,
+        }.get(method)

@@ -34,6 +34,16 @@ ADMIN_SCHEMA = {
         },
         "valuesrules": {"type": "integer", "allowed": status_code_allowed()},
     },
+    "static": {
+        "type": "dict",
+        "required": False,
+        "empty": False,
+        "keysrules": {
+            "type": "string",
+            "allowed": route_config.HTTPMethod.static(),
+            "coerce": (str, upper()),
+        },  # TODO: validate json valid.
+    },
 }
 
 ADMIN_DELETE_PATH = {
