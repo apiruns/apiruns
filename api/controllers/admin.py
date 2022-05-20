@@ -36,7 +36,7 @@ class AdminController:
         if "username" in context.extras:
             user = context.extras.get("username")
             data.name = f"{user}_{data.name}"
-            data.path = f"/@{user}{data.path}"
+            data.path = f"/{user}{data.path}"
 
         model = await repository.exist_path_or_model(data.path, data.name)
         if model:
