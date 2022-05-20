@@ -67,17 +67,17 @@ class Queries:
     """Queries repositories"""
 
     @staticmethod
-    async def find_user(model: str, email: str) -> Union[User, None]:
+    async def find_user(model: str, username: str) -> Union[User, None]:
         """Find a user.
 
         Args:
             model (str): model name.
-            email (str): user email.
+            username (str): username.
 
         Returns:
             Union[User, None]: User object or none.
         """
-        obj = await repository.find_one(model, {"username": email})
+        obj = await repository.find_one(model, {"username": username})
         return from_dict(User, obj) if obj else None
 
     @staticmethod

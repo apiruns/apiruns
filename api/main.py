@@ -57,18 +57,25 @@ async def list_models():
     return response
 
 
-# Admin create users
-@app.post(route_config.RouterAdmin.AUTHX_REGISTER)
+# Feature create users
+@app.post(route_config.RouterAdmin.AUTHX_USER)
 async def create_users(request: Request):
     """Create users."""
     return await AuthXController.create_user(request.state.input_context)
 
 
-# Admin users sign in
+# Feature users sign in
 @app.post(route_config.RouterAdmin.AUTHX_SIGN_IN)
 async def users_sign(request: Request):
     """Users sign in."""
     return await AuthXController.users_sign(request.state.input_context)
+
+
+# Feature get user
+@app.get(route_config.RouterAdmin.AUTHX_USER)
+async def get_user(request: Request, name: str):
+    """Get user."""
+    return await AuthXController.user(request.state.input_context, name)
 
 
 # Path root.
