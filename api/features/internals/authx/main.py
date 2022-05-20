@@ -57,7 +57,7 @@ class AuthX:
         """
         excluded = (
             route_config.RouterAdmin.PING,
-            route_config.RouterAdmin.AUTHX_REGISTER,
+            route_config.RouterAdmin.AUTHX_USER,
             route_config.RouterAdmin.AUTHX_SIGN_IN,
         )
         return path in excluded
@@ -205,3 +205,18 @@ class AuthX:
         content = user.to_response()
         content["token"] = self.encode(username=user.username)
         return ResponseContext(status_code=status.HTTP_201_CREATED, content=content)
+
+    async def exist_user(self, username: str) -> ResponseContext:
+        """Exist username.
+
+        Args:
+            username (str): username.
+
+        Returns:
+            ResponseContext: response OK if exist user else NOT_FOUND.
+        """
+        user = await Queries.find_user(self.configs.MODEL, username)
+        if user:
+            return ResponseContext(status_code=status.HTTP_200_OK, content={})
+
+        return ResponseContext(status_code=status.HTTP_404_NOT_FOUND, content={})
