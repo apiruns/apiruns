@@ -28,6 +28,7 @@ class AuthX:
     USER_EXIST = {"error": "username already exists"}
     USER_NOT_CREATED = {"error": "user not created"}
     AUTH_FAILED = {"error": "username or password wrong"}
+    FORBIDDEN = {"error": "you do not have permission to consume this resource."}
 
     def __init__(self):
         configs = app_configs.INTERNALS.get("AUTHX")
@@ -44,7 +45,30 @@ class AuthX:
         """
         if self.is_path_excluded(context.path):
             return ResponseContext()
-        return self.decode(context.headers)
+
+        response = self.decode(context.headers)
+        if response.content:
+            return self._has_permission(response, context.path)
+        return response
+
+    def _has_permission(self, response: ResponseContext, path: str) -> ResponseContext:
+        """Current user has permission.
+        Args:
+            response (ResponseContext): response.
+            path (str): current path.
+
+        Returns:
+            ResponseContext: response.
+        """
+        current_user = response.content.get("username")
+        path_split = path.split("/")
+        root = path_split[1] if len(path_split) > 1 else current_user
+        if current_user != root and not self.is_path_excluded(path):
+            return ResponseContext(
+                errors=self.FORBIDDEN, status_code=status.HTTP_403_FORBIDDEN
+            )
+
+        return response
 
     def is_path_excluded(self, path) -> bool:
         """Validate if is a path excluded.
