@@ -63,7 +63,7 @@ class AuthX:
         current_user = response.content.get("username")
         path_split = path.split("/")
         root = path_split[1] if len(path_split) > 1 else current_user
-        if current_user != root and not self.is_path_excluded(path):
+        if current_user != root:
             return ResponseContext(
                 errors=self.FORBIDDEN, status_code=status.HTTP_403_FORBIDDEN
             )

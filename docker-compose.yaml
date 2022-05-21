@@ -1,0 +1,26 @@
+version: '3.3'
+
+services:
+  db:
+    image: mongo
+    restart: always
+    volumes:
+      - mongodata:/data/db
+
+  app:
+    container_name: apisrun
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    ports:
+      - 8080:8080
+    restart: on-failure
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+    #env_file:
+    #  - .env
+
+volumes:
+  mongodata:
