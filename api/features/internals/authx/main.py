@@ -60,6 +60,9 @@ class AuthX:
         Returns:
             ResponseContext: response.
         """
+        if route_config.RouterAdmin.ADMIN == path:
+            return response
+
         current_user = response.content.get("username")
         path_split = path.split("/")
         root = path_split[1] if len(path_split) > 1 else current_user

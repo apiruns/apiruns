@@ -27,23 +27,6 @@ class RouterAdmin:
             cls.PING,
         )
 
-    @classmethod
-    def is_excluded(cls, path_list: list) -> bool:
-        """Validate if a path exist in the excluded.
-
-        Args:
-            path_list (list): path list.
-
-        Returns:
-            bool: _description_
-        """
-        exist = False
-        for p in path_list:
-            exist = p in cls.excluded()
-            if exist:
-                break
-        return exist
-
 
 class Router:
     """Router constants"""

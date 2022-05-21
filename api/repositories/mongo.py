@@ -160,13 +160,21 @@ class MongoRepository:
         return response.deleted_count
 
     @staticmethod
-    async def list_admin_model() -> List[dict]:
-        """List admin models
+    async def list_admin_model(username: str = None) -> List[dict]:
+        """List admin models.
+
+        Args:
+            username (str, optional): Model owner. Defaults to None.
 
         Returns:
             List[dict]: List admin models.
         """
-        rows = await db[ADMIN_MODEL].find({"is_deleted": None}, {"_id": 0}).to_list(100)
+        query = {"username": username} if username else {}
+        rows = (
+            await db[ADMIN_MODEL]
+            .find({"is_deleted": None, **query}, {"_id": 0})
+            .to_list(100)
+        )
         return rows
 
     @staticmethod

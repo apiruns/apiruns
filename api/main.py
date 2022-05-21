@@ -51,9 +51,9 @@ async def create_model(request: Request):
 
 # Admin model list
 @app.get(route_config.RouterAdmin.ADMIN)
-async def list_models():
+async def list_models(request: Request):
     """List models."""
-    response = await AdminController.list_models()
+    response = await AdminController.list_models(request.state.input_context)
     return response
 
 

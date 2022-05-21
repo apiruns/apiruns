@@ -46,6 +46,7 @@ class Model(BaseModel):
     schema: dict = field(default_factory=dict)
     status_code: dict = field(default_factory=dict)
     static: Union[None, dict] = None
+    username: Union[None, str] = None
 
     def __post_init__(self):
         self.name = self.name.strip().lower()
