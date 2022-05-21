@@ -34,9 +34,9 @@ class AdminController:
 
         # TODO: Move to internal feature handle.
         if "username" in context.extras:
-            user = context.extras.get("username")
-            data.name = f"{user}_{data.name}"
-            data.path = f"/{user}{data.path}"
+            data.username = context.extras.get("username")
+            data.name = f"{data.username}_{data.name}"
+            data.path = f"/{data.username}{data.path}"
 
         model = await repository.exist_path_or_model(data.path, data.name)
         if model:
@@ -50,13 +50,17 @@ class AdminController:
         return JSONResponse(status_code=status.HTTP_201_CREATED, content=response)
 
     @classmethod
-    async def list_models(cls) -> list:
+    async def list_models(cls, context: RequestContext) -> list:
         """List models.
 
         Returns:
             list: List of models.
         """
-        return await repository.list_admin_model()
+        username = None
+        if "username" in context.extras:
+            username = context.extras.get("username")
+
+        return await repository.list_admin_model(username)
 
     @classmethod
     async def delete_model(cls, context: RequestContext) -> JSONResponse:
