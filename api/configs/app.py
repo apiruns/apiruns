@@ -5,6 +5,11 @@ ENGINE_URI_DEFAULT = "mongodb://0.0.0.0:27017/"
 ENGINE_NAME = os.environ.get("ENGINE_NAME", "MONGO")
 ENGINE_DB_NAME = os.environ.get("ENGINE_DB_NAME", "apisrun")
 ENGINE_URI = os.environ.get("ENGINE_URI", ENGINE_URI_DEFAULT)
+
+# Mongo
+MONGO_TLS = bool(os.environ.get("MONGO_TLS", False))
+MONGO_CAFILE = os.environ.get("MONGO_CAFILE", "")
+
 ORIGINS_DEFAULT = [
     "http://localhost",
     "http://localhost:8080",

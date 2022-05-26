@@ -19,6 +19,7 @@ pytest-asyncio = "^0.15.1"
 dacite = "^1.6.0"
 PyJWT = "^2.3.0"
 bcrypt = "^3.2.0"
+dnspython = "^2.2.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
