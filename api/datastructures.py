@@ -50,9 +50,11 @@ class Model(BaseModel):
 
     def __post_init__(self):
         self.public_id = str(uuid.uuid4())
-        self.name = self.name.strip().lower()
         self.path = paths_without_slash(self.path.strip().lower())
-        self.name = f"model_{str(uuid.uuid4())}"
+        if self.name:
+            self.name = self.name.strip().lower()
+        else:
+            self.name = f"model-{str(uuid.uuid4())}"
 
     def static_response(self, method) -> JSONResponse:
         """Response from static.

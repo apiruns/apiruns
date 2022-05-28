@@ -157,6 +157,8 @@ class MongoRepository:
             dict: model deleted.
         """
         response = await db[ADMIN_MODEL].delete_one({"name": name})
+        if response.deleted_count > 0:
+            await db.drop_collection(name)
         return response.deleted_count
 
     @staticmethod
