@@ -13,6 +13,24 @@ class AdminController:
     """Admin Controller"""
 
     @classmethod
+    async def handle(cls, context: RequestContext) -> JSONResponse:
+        """Handle from methods.
+
+        Args:
+            context (RequestContext): request context.
+
+        Returns:
+            JSONResponse: response.
+        """
+        allowed = {
+            rt.HTTPMethod.POST: cls.create_model,
+            rt.HTTPMethod.GET: cls.list_models,
+            rt.HTTPMethod.DELETE: cls.delete_model,
+        }
+        fn = allowed.get(context.method)
+        return await fn(context)
+
+    @classmethod
     async def create_model(cls, context: RequestContext) -> JSONResponse:
         """Create a model.
 
@@ -60,7 +78,8 @@ class AdminController:
         if "username" in context.extras:
             username = context.extras.get("username")
 
-        return await repository.list_admin_model(username)
+        models = await repository.list_admin_model(username)
+        return JSONResponse(content=models)
 
     @classmethod
     async def delete_model(cls, context: RequestContext) -> JSONResponse:
@@ -76,5 +95,5 @@ class AdminController:
         if not valid:
             return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=errors)
 
-        await repository.delete_admin_model(context.body)
+        await repository.delete_admin_model(context.body.get("name"))
         return JSONResponse(status_code=status.HTTP_204_NO_CONTENT, content={})

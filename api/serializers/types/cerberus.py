@@ -54,10 +54,8 @@ ADMIN_DELETE_PATH = {
     }
 }
 ADMIN_DELETE_MODEL = {
-    "model": {
+    "name": {
         "type": "string",
-        "maxlength": 70,
-        "regex": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
     },
 }
 
