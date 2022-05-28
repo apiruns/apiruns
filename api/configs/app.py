@@ -36,5 +36,6 @@ INTERNALS = {
         "MODEL": "apisrun_users",
         "SIGN_IN_PATH": "/admin/users/signin",
         "REGISTER_PATH": "/admin/users",
+        "ALLOWED_MODELS": int(os.environ.get("AUTHX_ALLOWED_MODELS", 10)),
     }
 }

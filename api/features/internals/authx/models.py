@@ -5,6 +5,7 @@ from typing import Union
 import bcrypt
 from dacite import from_dict
 
+from api.configs import app_configs
 from api.datastructures import BaseModel
 from api.repositories import repository
 
@@ -20,6 +21,7 @@ class AuthXConfig:
     MODEL: str
     SIGN_IN_PATH: str
     REGISTER_PATH: str
+    ALLOWED_MODELS: int
 
 
 @dataclass
@@ -33,10 +35,11 @@ class User(BaseModel):
     password: str = ""
     email: str = ""
     username: str = ""
+    allowed_models: int = 0
     verified: bool = field(default_factory=lambda: False)
 
     def protected(self) -> None:
-        """protect password field."""
+        """Protect password field."""
         p = bcrypt.hashpw(self.password.encode("utf-8"), bcrypt.gensalt(10))
         self.password = p.decode()
 
@@ -93,3 +96,18 @@ class Queries:
         """
         obj = await repository.create_one(data, model)
         return from_dict(User, obj) if obj else None
+
+    @staticmethod
+    async def max_models(username: str) -> int:
+        """Max model by user
+
+        Args:
+            username (str): username.
+
+        Returns:
+            int: Quantity of models.
+        """
+        models = await repository.count(
+            app_configs.MODEL_ADMIN_NAME, {"username": username}
+        )
+        return models
