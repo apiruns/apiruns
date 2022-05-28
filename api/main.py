@@ -8,7 +8,7 @@ from api.configs import app_configs
 from api.configs import route_config
 from api.controllers.admin import AdminController
 from api.controllers.core import CoreController
-from api.controllers.feature import AuthXController
+from api.controllers.feature import MicroController
 from api.exceptions import BaseException
 from api.middleware import get_context
 from api.middleware import get_internal_feature
@@ -72,24 +72,24 @@ async def models(request: Request):
 
 
 # Feature create users
-@app.post(route_config.RouterAdmin.AUTHX_USER)
+@app.post(route_config.RouterAdmin.MICRO_USER)
 async def create_users(request: Request):
     """Create users."""
-    return await AuthXController.create_user(request.state.input_context)
+    return await MicroController.create_user(request.state.input_context)
 
 
 # Feature users sign in
-@app.post(route_config.RouterAdmin.AUTHX_SIGN_IN)
+@app.post(route_config.RouterAdmin.MICRO_SIGN_IN)
 async def users_sign(request: Request):
     """Users sign in."""
-    return await AuthXController.users_sign(request.state.input_context)
+    return await MicroController.users_sign(request.state.input_context)
 
 
 # Feature get user
-@app.get(route_config.RouterAdmin.AUTHX_USER)
+@app.get(route_config.RouterAdmin.MICRO_USER)
 async def get_user(request: Request, name: str):
     """Get user."""
-    return await AuthXController.user(request.state.input_context, name)
+    return await MicroController.user(request.state.input_context, name)
 
 
 # Path root.

@@ -8,10 +8,10 @@ from fastapi import status
 
 from .exceptions import ExceptionAllowedModels
 from .exceptions import ExceptionUserNotFound
-from .models import AuthXConfig
+from .models import MicroConfig
 from .models import Queries
 from .models import User
-from .serializers import AuthXSerializer
+from .serializers import MicroSerializer
 from api.configs import app_configs
 from api.configs import route_config
 from api.datastructures import Model
@@ -19,8 +19,8 @@ from api.datastructures import RequestContext
 from api.datastructures import ResponseContext
 
 
-class AuthX:
-    """AuthX internal feature"""
+class Micro:
+    """Micro internal feature"""
 
     # errors
     HEADER_REQUIRED = {"error": "`Authorization` header is required"}
@@ -34,8 +34,8 @@ class AuthX:
     FORBIDDEN = {"error": "you do not have permission to consume this resource."}
 
     def __init__(self):
-        configs = app_configs.INTERNALS.get("AUTHX")
-        self.configs = from_dict(AuthXConfig, configs)
+        configs = app_configs.INTERNALS.get("MICRO")
+        self.configs = from_dict(MicroConfig, configs)
 
     async def handle(self, context: RequestContext) -> ResponseContext:
         """Handle feature entrypoint.
@@ -87,8 +87,8 @@ class AuthX:
         """
         excluded = (
             route_config.RouterAdmin.PING,
-            route_config.RouterAdmin.AUTHX_USER,
-            route_config.RouterAdmin.AUTHX_SIGN_IN,
+            route_config.RouterAdmin.MICRO_USER,
+            route_config.RouterAdmin.MICRO_SIGN_IN,
         )
         return path in excluded
 
@@ -174,7 +174,7 @@ class AuthX:
         Returns:
             ResponseContext: response context.
         """
-        errors = AuthXSerializer.validate_login(payload)
+        errors = MicroSerializer.validate_login(payload)
         if errors:
             return ResponseContext(
                 status_code=status.HTTP_400_BAD_REQUEST, errors=errors
@@ -212,7 +212,7 @@ class AuthX:
         Returns:
             ResponseContext: response context.
         """
-        errors = AuthXSerializer.validate_login(payload)
+        errors = MicroSerializer.validate_login(payload)
         if errors:
             return ResponseContext(
                 status_code=status.HTTP_400_BAD_REQUEST, errors=errors

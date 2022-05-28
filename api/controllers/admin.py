@@ -28,6 +28,11 @@ class AdminController:
             rt.HTTPMethod.DELETE: cls.delete_model,
         }
         fn = allowed.get(context.method)
+        if not fn:
+            return JSONResponse(
+                status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
+                content={"error": "Method Not Allowed"},
+            )
         return await fn(context)
 
     @classmethod
@@ -52,9 +57,9 @@ class AdminController:
                 content={"error": "the path already exists, is admin path."},
             )
 
-        auth = features.get(InternalFeature.AUTHX)
-        if auth.is_on():
-            model_p = await auth.creation_model_validation(model_p, context)
+        micro = features.get(InternalFeature.MICRO)
+        if micro.is_on():
+            model_p = await micro.creation_model_validation(model_p, context)
 
         model = await repository.exist_path_or_model(model_p.path, model_p.name)
         if model:

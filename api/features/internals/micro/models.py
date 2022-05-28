@@ -12,8 +12,8 @@ from api.repositories import repository
 
 
 @dataclass(frozen=True)
-class AuthXConfig:
-    """AuthX object config"""
+class MicroConfig:
+    """Micro object config"""
 
     ON: bool
     JWT_SECRET: str

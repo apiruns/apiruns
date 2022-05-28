@@ -53,9 +53,9 @@ async def get_internal_feature(
     Returns:
         ResponseContext: response context.
     """
-    auth = features.get(InternalFeature.AUTHX)
-    if auth.is_on():
-        response = await auth.handle(context)
+    micro = features.get(InternalFeature.MICRO)
+    if micro.is_on():
+        response = await micro.handle(context)
         if response.content:
             context.extras = response.content
         return context, response

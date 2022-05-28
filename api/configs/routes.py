@@ -7,8 +7,8 @@ class RouterAdmin:
 
     ADMIN = os.environ.get("MAIN_ADMIN_PATH", "/admin/models")
     # Internal feature
-    AUTHX_SIGN_IN = "/admin/users/signin"
-    AUTHX_USER = "/admin/users"
+    MICRO_SIGN_IN = "/admin/users/signin"
+    MICRO_USER = "/admin/users"
 
     # ping
     PING = os.environ.get("PING_ADMIN_PATH", "/ping")
@@ -22,8 +22,8 @@ class RouterAdmin:
         """
         return (
             cls.ADMIN,
-            cls.AUTHX_SIGN_IN,
-            cls.AUTHX_USER,
+            cls.MICRO_SIGN_IN,
+            cls.MICRO_USER,
             cls.PING,
         )
 
