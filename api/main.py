@@ -61,19 +61,13 @@ def ping() -> dict:
     return {"pong": "OK"}
 
 
-# Admin model create
-@app.post(route_config.RouterAdmin.ADMIN)
-async def create_model(request: Request):
-    """Create a model."""
-    response = await AdminController.create_model(request.state.input_context)
-    return response
-
-
-# Admin model list
+# Models
 @app.get(route_config.RouterAdmin.ADMIN)
-async def list_models(request: Request):
-    """List models."""
-    response = await AdminController.list_models(request.state.input_context)
+@app.post(route_config.RouterAdmin.ADMIN)
+@app.delete(route_config.RouterAdmin.ADMIN)
+async def models(request: Request):
+    """Models endpoints."""
+    response = await AdminController.handle(request.state.input_context)
     return response
 
 

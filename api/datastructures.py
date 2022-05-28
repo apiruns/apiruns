@@ -21,7 +21,7 @@ from api.utils import split_uuid_path
 class BaseModel:
     """Field bases"""
 
-    public_id: str = str(uuid.uuid4())
+    public_id: str = ""
     created_at: Union[datetime, str, None] = datetime.now(timezone.utc)
     updated_at: Union[datetime, str, None] = None
     deleted_at: Union[datetime, str, None] = None
@@ -42,15 +42,17 @@ class Model(BaseModel):
     """Admin Model"""
 
     path: str = "/"
-    name: str = f"model_{str(uuid.uuid4())}"
+    name: str = ""
     schema: dict = field(default_factory=dict)
     status_code: dict = field(default_factory=dict)
     static: Union[None, dict] = None
     username: Union[None, str] = None
 
     def __post_init__(self):
+        self.public_id = str(uuid.uuid4())
         self.name = self.name.strip().lower()
         self.path = paths_without_slash(self.path.strip().lower())
+        self.name = f"model_{str(uuid.uuid4())}"
 
     def static_response(self, method) -> JSONResponse:
         """Response from static.

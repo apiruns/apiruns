@@ -1,3 +1,4 @@
+import uuid
 from dataclasses import dataclass
 from dataclasses import field
 from typing import Union
@@ -37,6 +38,9 @@ class User(BaseModel):
     username: str = ""
     allowed_models: int = 0
     verified: bool = field(default_factory=lambda: False)
+
+    def __post_init__(self):
+        self.public_id = str(uuid.uuid4())
 
     def protected(self) -> None:
         """Protect password field."""

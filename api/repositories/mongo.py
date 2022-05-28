@@ -147,16 +147,16 @@ class MongoRepository:
         return row
 
     @staticmethod
-    async def delete_admin_model(model: dict) -> int:
-        """Delete a admin model.
+    async def delete_admin_model(name: str) -> int:
+        """Delete a model.
 
         Args:
-            body (dict): body of admin model.
+            name (dict): name model.
 
         Returns:
-            dict: model admin.
+            dict: model deleted.
         """
-        response = await db[ADMIN_MODEL].delete_one({"name": model})
+        response = await db[ADMIN_MODEL].delete_one({"name": name})
         return response.deleted_count
 
     @staticmethod
