@@ -6,12 +6,15 @@ import jwt
 from dacite import from_dict
 from fastapi import status
 
+from .exceptions import ExceptionAllowedModels
+from .exceptions import ExceptionUserNotFound
 from .models import AuthXConfig
 from .models import Queries
 from .models import User
 from .serializers import AuthXSerializer
 from api.configs import app_configs
 from api.configs import route_config
+from api.datastructures import Model
 from api.datastructures import RequestContext
 from api.datastructures import ResponseContext
 
@@ -220,6 +223,7 @@ class AuthX:
             return ResponseContext(
                 status_code=status.HTTP_400_BAD_REQUEST, errors=self.USER_EXIST
             )
+        payload["allowed_models"] = self.configs.ALLOWED_MODELS
         user_unverified = from_dict(User, payload)
         user_unverified.protected()
 
@@ -247,3 +251,31 @@ class AuthX:
             return ResponseContext(status_code=status.HTTP_200_OK, content={})
 
         return ResponseContext(status_code=status.HTTP_404_NOT_FOUND, content={})
+
+    async def creation_model_validation(
+        self, model: Model, context: RequestContext
+    ) -> Model:
+        """Validate model creation.
+
+        Args:
+            model (Model): Model not safe.
+            context (RequestContext): request context.
+
+        Raises:
+            ExceptionUserNotFound: User not found.
+            ExceptionAllowedModels: Max models allowed.
+
+        Returns:
+            Model: Model not safe modified.
+        """
+        model.username = context.extras.get("username")
+        model.name = f"{model.username}_{model.name}"
+        model.path = f"/{model.username}{model.path}"
+        user = await Queries.find_user(self.configs.MODEL, model.username)
+        if not user:
+            raise ExceptionUserNotFound
+
+        models_created = await Queries.max_models(model.username)
+        if models_created >= user.allowed_models:
+            raise ExceptionAllowedModels
+        return model
