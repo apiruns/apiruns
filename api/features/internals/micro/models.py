@@ -2,13 +2,14 @@ import uuid
 from dataclasses import dataclass
 from dataclasses import field
 from typing import Union
+from api.configs import app_configs
 
 import bcrypt
 from dacite import from_dict
 
-from api.configs import app_configs
 from api.datastructures import BaseModel
-from api.repositories import repository
+from api.datastructures import Model
+from api.repositories import Base
 
 
 @dataclass(frozen=True)
@@ -23,6 +24,13 @@ class MicroConfig:
     SIGN_IN_PATH: str
     REGISTER_PATH: str
     ALLOWED_MODELS: int
+    USER_MODEL: str
+    MODEL_ROWS: str
+
+
+def get_config() -> MicroConfig:
+    configs = app_configs.INTERNALS.get("MICRO")
+    return from_dict(MicroConfig, configs)
 
 
 @dataclass
@@ -70,48 +78,92 @@ class User(BaseModel):
         return r
 
 
-class Queries:
-    """Queries repositories"""
+class Repository(Base):
+    """Micro repositories"""
 
-    @staticmethod
-    async def find_user(model: str, username: str) -> Union[User, None]:
-        """Find a user.
+    excluded = {"_id": 0}
+    limit = 50
+    _config = get_config()
 
-        Args:
-            model (str): model name.
-            username (str): username.
-
-        Returns:
-            Union[User, None]: User object or none.
-        """
-        obj = await repository.find_one(model, {"username": username})
-        return from_dict(User, obj) if obj else None
-
-    @staticmethod
-    async def create_user(data: dict, model: str) -> Union[User, None]:
-        """Create a user.
-
-        Args:
-            data (dict): user payload.
-            model (str): mdoel name.
-
-        Returns:
-            Union[User, None]: User obj or None.
-        """
-        obj = await repository.create_one(data, model)
-        return from_dict(User, obj) if obj else None
-
-    @staticmethod
-    async def max_models(username: str) -> int:
-        """Max model by user
-
-        Args:
-            username (str): username.
-
-        Returns:
-            int: Quantity of models.
-        """
-        models = await repository.count(
-            app_configs.MODEL_ADMIN_NAME, {"username": username}
+    # Users
+    @classmethod
+    async def find_user(cls, username: str) -> Union[User, None]:
+        obj = await cls.find_one(
+            cls._config.USER_MODEL, {"username": username}, cls.excluded
         )
+        return from_dict(User, obj) if obj else None
+
+    @classmethod
+    async def create_user(cls, data: dict) -> Union[User, None]:
+        obj = await cls.create_one(cls._config.USER_MODEL, data)
+        return from_dict(User, obj) if obj else None
+
+    @classmethod
+    async def max_models_by_user(cls, username: str) -> int:
+        models = await cls.count(cls._config.MODEL, {"username": username})
         return models
+
+    # Commons
+    @classmethod
+    async def list_models(cls, **kwargs):
+        models = await cls.find(cls._config.MODEL_ROWS, kwargs, cls.excluded, cls.limit)
+        return models
+
+    @classmethod
+    async def create_model(cls, data: dict):
+        obj = await cls.create_one(cls._config.MODEL, data, cls.excluded)
+        return from_dict(Model, obj) if obj else None
+
+    @classmethod
+    async def exist_path_or_model(cls, path: str, model_name: str):
+        query = {"$or": [{"path": path}, {"model": model_name}]}
+        obj = await cls.find_one(cls._config.MODEL, query, cls.excluded)
+        return from_dict(Model, obj) if obj else None
+
+    @classmethod
+    async def model_by_path(cls, path: str) -> int:
+        obj = await cls.find_one(cls._config.MODEL, {"path": path}, cls.excluded)
+        return from_dict(Model, obj) if obj else None
+
+    @classmethod
+    async def delete_model(cls, model_name: str) -> int:
+        query = {"name": model_name}
+        deleted = await cls.delete_many(cls._config.MODEL_ROWS, query)
+        return deleted
+
+    @classmethod
+    async def find_one_or_many(
+        cls, model_name: str, resource_id: str
+    ) -> Union[dict, list]:
+
+        query = {"name": model_name}
+        if resource_id:
+            query = {cls.main_field: resource_id, **query}
+            response = await cls.find_one(cls._config.MODEL_ROWS, query, cls.excluded)
+            return response
+
+        rows = await cls.find(cls._config.MODEL_ROWS, query, cls.excluded)
+        return rows
+
+    @classmethod
+    async def create_row(cls, model_name: str, data: dict):
+        data = {
+            "name": model_name,
+            cls.main_field: data.get(cls.main_field),
+            "data": data,
+        }
+        obj = await cls.create_one(cls._config.MODEL_ROWS, data, cls.excluded)
+        return obj
+
+    @classmethod
+    async def update_row(cls, model_name: str, resource_id: str, data: dict) -> int:
+        query = {cls.main_field: resource_id, "name": model_name}
+        data = {**query, "data": data}
+        updated = await cls.update_one(cls._config.MODEL_ROWS, query, data)
+        return updated
+
+    @classmethod
+    async def delete_row(cls, model_name: str, resource_id: str):
+        query = {cls.main_field: resource_id, "name": model_name}
+        deleted = await cls.delete_one(cls._config.MODEL_ROWS, query)
+        return deleted

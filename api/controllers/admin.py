@@ -5,12 +5,14 @@ from api.configs import route_config as rt
 from api.datastructures import RequestContext
 from api.features.internals import features
 from api.features.internals import InternalFeature
-from api.repositories import repository
+from api.repositories import repository_from_feature
 from api.serializers.admin import AdminSerializer
 
 
 class AdminController:
     """Admin Controller"""
+
+    repository = repository_from_feature()
 
     @classmethod
     async def handle(cls, context: RequestContext) -> JSONResponse:
@@ -61,7 +63,7 @@ class AdminController:
         if micro.is_on():
             model_p = await micro.creation_model_validation(model_p, context)
 
-        model = await repository.exist_path_or_model(model_p.path, model_p.name)
+        model = await cls.repository.exist_path_or_model(model_p.path, model_p.name)
         if model:
             name = "path" if model.path == model_p.path else "model"
             return JSONResponse(
@@ -69,8 +71,10 @@ class AdminController:
                 content={"error": f"the {name} already exists."},
             )
 
-        response = await repository.create_admin_model(model_p.to_json())
-        return JSONResponse(status_code=status.HTTP_201_CREATED, content=response)
+        response = await cls.repository.create_model(model_p.to_json())
+        return JSONResponse(
+            status_code=status.HTTP_201_CREATED, content=response.to_json()
+        )
 
     @classmethod
     async def list_models(cls, context: RequestContext) -> list:
@@ -83,7 +87,7 @@ class AdminController:
         if "username" in context.extras:
             username = context.extras.get("username")
 
-        models = await repository.list_admin_model(username)
+        models = await cls.repository.list_models(username)
         return JSONResponse(content=models)
 
     @classmethod
@@ -100,5 +104,5 @@ class AdminController:
         if not valid:
             return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=errors)
 
-        await repository.delete_admin_model(context.body.get("name"))
+        await cls.repository.delete_model(context.body.get("name"))
         return JSONResponse(status_code=status.HTTP_204_NO_CONTENT, content={})
