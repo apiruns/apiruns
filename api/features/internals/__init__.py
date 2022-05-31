@@ -2,16 +2,16 @@ from typing import Union
 
 from api.datastructures import RequestContext
 from api.datastructures import ResponseContext
-from api.features.internals.authx import AuthX
+from api.features.internals.micro import Micro
 
 
 class InternalFeature:
     """Internal feature names"""
 
-    AUTHX = "AUTHX"
+    MICRO = "MICRO"
 
 
-features = {InternalFeature.AUTHX: AuthX()}
+features = {InternalFeature.MICRO: Micro()}
 
 
 async def internal_handle(context: RequestContext) -> Union[ResponseContext, None]:

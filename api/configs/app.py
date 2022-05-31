@@ -28,14 +28,16 @@ PATH_SECTION = 7
 
 # Features
 INTERNALS = {
-    "AUTHX": {
-        "ON": bool(os.environ.get("AUTHX", False)),
-        "JWT_SECRET": os.environ.get("AUTHX_JWT_SECRET", "SUPER_SECRET"),
-        "JWT_EXP": int(os.environ.get("AUTHX_JWT_EXP", 3600)),
+    "MICRO": {
+        "ON": bool(os.environ.get("MICRO", False)),
+        "JWT_SECRET": os.environ.get("MICRO_JWT_SECRET", "SUPER_SECRET"),
+        "JWT_EXP": int(os.environ.get("MICRO_JWT_EXP", 3600)),
         "JWT_ALGORITHM": "HS256",
-        "MODEL": "apisrun_users",
+        "MODEL": MODEL_ADMIN_NAME,
+        "MODEL_ROWS": "apisrun_rows",
         "SIGN_IN_PATH": "/admin/users/signin",
         "REGISTER_PATH": "/admin/users",
-        "ALLOWED_MODELS": int(os.environ.get("AUTHX_ALLOWED_MODELS", 10)),
+        "ALLOWED_MODELS": int(os.environ.get("MICRO_ALLOWED_MODELS", 10)),
+        "USER_MODEL": "apisrun_users",
     }
 }

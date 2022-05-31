@@ -1,8 +1,8 @@
 from api.serializers import Serializer
 
 
-class AuthXSerializer(Serializer):
-    """AuthX Serializer"""
+class MicroSerializer(Serializer):
+    """Micro Serializer"""
 
     # validations
     CERBERUS_USER_SCHEMA = {

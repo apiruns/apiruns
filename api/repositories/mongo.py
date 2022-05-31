@@ -8,206 +8,263 @@ from api.datastructures import Model
 from api.engines import db
 
 
-ADMIN_MODEL = app_configs.MODEL_ADMIN_NAME
-ID_FIELD = app_configs.IDENTIFIER_ID
+class BaseRepository:
+    """Base repository"""
 
+    main_model = app_configs.MODEL_ADMIN_NAME
+    main_field = app_configs.IDENTIFIER_ID
+    client = db
 
-class MongoRepository:
-    """It is the collection of queries to the mongo client."""
-
-    @staticmethod
-    async def create_one(data, model) -> dict:
-        """Create a document in mongo.
+    @classmethod
+    async def create_one(
+        cls, collection: str, data: dict, excluded: dict
+    ) -> Union[dict, None]:
+        """Create an object.
 
         Args:
+            collection (str): Collection name.
             data (dict): Data to save.
-            model (str): Collection name.
+            excluded (dict): Query to exclude.
 
         Returns:
-            dict: Document created.
+            Union[dict, None]: Return `dict` if object was created else `None`
         """
-        obj = await db[model].insert_one(data)
-        response = await db[model].find_one({"_id": obj.inserted_id}, {"_id": 0})
+        obj = await cls.client[collection].insert_one(data)
+        response = await cls.client[collection].find_one(
+            {"_id": obj.inserted_id}, excluded
+        )
         return response
 
-    @staticmethod
-    async def find(model, limit=app_configs.QUERY_LIMIT, params={}) -> dict:
-        """Find documents in mongo.
+    @classmethod
+    async def find_one(
+        cls, collection: str, query: dict, excluded: dict
+    ) -> Union[dict, None]:
+        """Get an object.
 
         Args:
-            model (str): Collection name.
-            limit (int): Limit documents.
-            params (dict): Filters.
+            collection (str): Collection name.
+            query (dict): search.
+            excluded (dict): Query to exclude.
 
         Returns:
-            list: Documents found.
+            Union[dict, None]: Return `dict` if object was found else `None`
         """
-        response = await db[model].find(params, {"_id": 0}).to_list(limit)
+        response = await cls.client[collection].find_one(query, excluded)
         return response
 
-    @staticmethod
-    async def count(model, params={}) -> int:
-        """Quantity of documents in mongo.
+    @classmethod
+    async def find(
+        cls, collection: str, query: dict, excluded: dict, limit: int
+    ) -> List:
+        """List objects.
 
         Args:
-            model (str): Collection name.
-            params (dict): Filters.
+            collection (str): Collection name.
+            query (dict): search.
+            excluded (dict): Query to exclude.
+            limit: limit search.
 
         Returns:
-            int: number of documents found.
+            list: Return list of object found.
         """
-        response = await db[model].count_documents(params)
+        response = await cls.client[collection].find(query, excluded).to_list(limit)
         return response
 
-    @staticmethod
-    async def find_one(model, params={}) -> dict:
-        """Get one document in mongo.
+    @classmethod
+    async def update_one(cls, collection: str, query: dict, data: dict) -> int:
+        """Update an object.
 
         Args:
-            model (str): Collection name.
-            params (dict): Filters.
+            collection (str): Collection name.
+            query (dict): search.
+            data (dict): Data to update.
 
         Returns:
-            dict: Documents found.
+            int: Return object updated.
         """
-        response = await db[model].find_one(params, {"_id": 0})
-        return response
-
-    @staticmethod
-    async def update_one(model: str, _id: str, data: dict) -> int:
-        """Update one document in mongo.
-
-        Args:
-            model (str): Collection name.
-            _id (str): Reference id.
-            params (dict): Filters.
-
-        Returns:
-            int: Document modified count.
-        """
-        response = await db[model].update_one({ID_FIELD: _id}, {"$set": data})
+        response = await cls.client[collection].update_one(query, {"$set": data})
         return response.modified_count
 
-    @staticmethod
-    async def delete_one(model, _id) -> int:
-        """Delete one document in mongo.
+    @classmethod
+    async def delete_one(cls, collection: str, query: dict) -> int:
+        """Delete an object.
 
         Args:
-            model (str): Collection name.
-            _id (str): Reference id.
+            collection (str): Collection name.
+            query (dict): search.
 
         Returns:
-            int: Document deleted count.
+            int: Return object deleted.
         """
-        response = await db[model].delete_one({ID_FIELD: _id})
+        response = await cls.client[collection].delete_one(query)
         return response.deleted_count
 
-    @staticmethod
-    async def exist_model(name: str) -> bool:
-        """Validate existence of a model in admin model.
+    @classmethod
+    async def delete_many(cls, collection: str, query: dict) -> int:
+        """Delete many objects.
 
         Args:
-            name (str): model name.
+            collection (str): Collection name.
+            query (dict): search.
 
         Returns:
-            bool: exist model.
+            int: Return objects deleted.
         """
-        rows = await db[ADMIN_MODEL].count_documents({"model": name})
-        return rows > 0
-
-    @staticmethod
-    async def exist_path_or_model(path: str, model: str) -> Union[None, Model]:
-        """Validate existence of the path or model in admin model.
-
-        Args:
-            path (str): path url.
-
-        Returns:
-            bool: exist path.
-        """
-        response = await db[ADMIN_MODEL].find_one(
-            {"$or": [{"path": path}, {"model": model}]}, {"_id": 0}
-        )
-        if response:
-            return from_dict(data_class=Model, data=response)
-        return response
-
-    @staticmethod
-    async def create_admin_model(body: dict) -> dict:
-        """Create a admin model.
-
-        Args:
-            body (dict): body of admin model.
-
-        Returns:
-            dict: model admin.
-        """
-        obj = await db[ADMIN_MODEL].insert_one(body)
-        row = await db[ADMIN_MODEL].find_one({"_id": obj.inserted_id}, {"_id": 0})
-        return row
-
-    @staticmethod
-    async def delete_admin_model(name: str) -> int:
-        """Delete a model.
-
-        Args:
-            name (dict): name model.
-
-        Returns:
-            dict: model deleted.
-        """
-        response = await db[ADMIN_MODEL].delete_one({"name": name})
-        if response.deleted_count > 0:
-            await db.drop_collection(name)
+        response = await cls.client[collection].delete_many(query)
         return response.deleted_count
 
-    @staticmethod
-    async def list_admin_model(username: str = None) -> List[dict]:
-        """List admin models.
+    @classmethod
+    async def count(cls, collection: str, query: dict) -> int:
+        """Get when objects are found.
 
         Args:
-            username (str, optional): Model owner. Defaults to None.
+            collection (str): Collection name.
+            query (dict): search.
 
         Returns:
-            List[dict]: List admin models.
+            int: objects found.
         """
-        query = {"username": username} if username else {}
-        rows = (
-            await db[ADMIN_MODEL]
-            .find({"is_deleted": None, **query}, {"_id": 0})
-            .to_list(100)
-        )
-        return rows
-
-    @staticmethod
-    async def model_by_path(path: str) -> Union[None, Model]:
-        """Look for admin model by path url.
-
-        Args:
-            path (str): path url.
-
-        Returns:
-            dict: admin model
-        """
-        response = await db[ADMIN_MODEL].find_one({"path": path}, {"_id": 0})
-        if response:
-            return from_dict(data_class=Model, data=response)
+        response = await cls.client[collection].count_documents(query)
         return response
 
-    @staticmethod
-    async def find_one_or_many(model, _id) -> Union[dict, List[dict]]:
-        """Get one or many documents.
 
-        Args:
-            model (str): Collection name.
-            _id (str): reference id.
+class MongoRepository(BaseRepository):
+    """Mongo repository"""
+
+    excluded = {"_id": 0}  # Fields excluded
+    limit = 100  # Query limit
+
+    # Commons
+    @classmethod
+    async def list_models(cls, **kwargs) -> list:
+        """List models.
 
         Returns:
-            Union[dict,List[dict]]: Documents found.
+            list: Models found.
         """
-        if _id:
-            response = await db[model].find_one({ID_FIELD: _id}, {"_id": 0})
+        models = await cls.find(cls.main_model, kwargs, cls.excluded, cls.limit)
+        return models
+
+    @classmethod
+    async def create_model(cls, data: dict) -> Union[Model, None]:
+        """Create a model.
+
+        Args:
+            data (dict): Data required by model object.
+
+        Returns:
+            Union[Model, None]: Return `Model` if was success else `None`.
+        """
+        obj = await cls.create_one(cls.main_model, data, cls.excluded)
+        return from_dict(Model, obj) if obj else None
+
+    @classmethod
+    async def exist_path_or_model(
+        cls, path: str, model_name: str
+    ) -> Union[Model, None]:
+        """Find model exists from path or name.
+
+        Args:
+            path (str): request path.
+            model_name (str): model name.
+
+        Returns:
+            Union[Model, None]: Return `Model` if was success else `None`.
+        """
+        query = {"$or": [{"path": path}, {"model": model_name}]}
+        obj = await cls.find_one(cls.main_model, query, cls.excluded)
+        return from_dict(Model, obj) if obj else None
+
+    @classmethod
+    async def model_by_path(cls, path: str) -> Union[Model, None]:
+        """Find model from path.
+
+        Args:
+            path (str): Path request.
+
+        Returns:
+            Union[Model, None]: Return `Model` if was success else `None`.
+        """
+        obj = await cls.find_one(cls.main_model, {"path": path}, cls.excluded)
+        return from_dict(Model, obj) if obj else None
+
+    @classmethod
+    async def delete_model(cls, model_name: str) -> int:
+        """Delete model.
+
+        Args:
+            model_name (str): Model name.
+
+        Returns:
+            int: Return model deleted.
+        """
+        deleted_count = await cls.delete_one(cls.main_model, {"name": model_name})
+        if deleted_count > 0:
+            await cls.client.drop_collection(model_name)
+        return deleted_count
+
+    @classmethod
+    async def find_one_or_many(
+        cls, model_name: str, resource_id: str
+    ) -> Union[dict, list, None]:
+        """Find one or more rows.
+
+        Args:
+            model_name (str): Model name.
+            resource_id (str): Resource id.
+
+        Returns:
+            Union[dict, list, None]: Return `None` if was not found else list or dict.
+        """
+        if resource_id:
+            query = {cls.main_field: resource_id}
+            response = await cls.find_one(model_name, query, cls.excluded)
             return response
 
-        response = await MongoRepository.find(model)
+        rows = await cls.find(model_name, query, cls.excluded, cls.limit)
+        return rows
+
+    @classmethod
+    async def create_row(cls, model_name: str, data: dict) -> Union[dict, None]:
+        """Create a row.
+
+        Args:
+            model_name (str): Model name.
+            data (dict): Data required.
+
+        Returns:
+            Union[dict, None]: Return data created.
+        """
+        response = await cls.create_one(model_name, data, cls.excluded)
         return response
+
+    @classmethod
+    async def update_row(cls, model_name: str, resource_id: str, data: dict) -> int:
+        """Update a row.
+
+        Args:
+            model_name (str): Model name.
+            resource_id (str): Resource id.
+            data (dict): Data to update.
+
+        Returns:
+            int: Row deleted.
+        """
+        query = {cls.main_field: resource_id}
+        updated = await cls.update_one(model_name, query, data)
+        return updated
+
+    @classmethod
+    async def delete_row(cls, model_name: str, resource_id: str):
+        """Delete a row.
+
+        Args:
+            model_name (str): Model name.
+            resource_id (str): Resource id.
+
+        Returns:
+            int: Row deleted.
+        """
+        query = {cls.main_field: resource_id}
+        deleted = await cls.delete_one(model_name, query)
+        return deleted

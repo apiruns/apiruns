@@ -8,19 +8,17 @@ from fastapi import status
 
 from .exceptions import ExceptionAllowedModels
 from .exceptions import ExceptionUserNotFound
-from .models import AuthXConfig
-from .models import Queries
-from .models import User
-from .serializers import AuthXSerializer
-from api.configs import app_configs
+from .models import Repository
+from .models import User, get_config
+from .serializers import MicroSerializer
 from api.configs import route_config
 from api.datastructures import Model
 from api.datastructures import RequestContext
 from api.datastructures import ResponseContext
 
 
-class AuthX:
-    """AuthX internal feature"""
+class Micro:
+    """Micro internal feature"""
 
     # errors
     HEADER_REQUIRED = {"error": "`Authorization` header is required"}
@@ -34,8 +32,7 @@ class AuthX:
     FORBIDDEN = {"error": "you do not have permission to consume this resource."}
 
     def __init__(self):
-        configs = app_configs.INTERNALS.get("AUTHX")
-        self.configs = from_dict(AuthXConfig, configs)
+        self.configs = get_config()
 
     async def handle(self, context: RequestContext) -> ResponseContext:
         """Handle feature entrypoint.
@@ -87,8 +84,8 @@ class AuthX:
         """
         excluded = (
             route_config.RouterAdmin.PING,
-            route_config.RouterAdmin.AUTHX_USER,
-            route_config.RouterAdmin.AUTHX_SIGN_IN,
+            route_config.RouterAdmin.MICRO_USER,
+            route_config.RouterAdmin.MICRO_SIGN_IN,
         )
         return path in excluded
 
@@ -174,13 +171,13 @@ class AuthX:
         Returns:
             ResponseContext: response context.
         """
-        errors = AuthXSerializer.validate_login(payload)
+        errors = MicroSerializer.validate_login(payload)
         if errors:
             return ResponseContext(
                 status_code=status.HTTP_400_BAD_REQUEST, errors=errors
             )
 
-        user = await Queries.find_user(self.configs.MODEL, payload.get("username"))
+        user = await Repository.find_user(payload.get("username"))
         if not user:
             return ResponseContext(
                 status_code=status.HTTP_400_BAD_REQUEST, errors=self.AUTH_FAILED
@@ -212,13 +209,13 @@ class AuthX:
         Returns:
             ResponseContext: response context.
         """
-        errors = AuthXSerializer.validate_login(payload)
+        errors = MicroSerializer.validate_login(payload)
         if errors:
             return ResponseContext(
                 status_code=status.HTTP_400_BAD_REQUEST, errors=errors
             )
 
-        user = await Queries.find_user(self.configs.MODEL, payload.get("username"))
+        user = await Repository.find_user(payload.get("username"))
         if user:
             return ResponseContext(
                 status_code=status.HTTP_400_BAD_REQUEST, errors=self.USER_EXIST
@@ -227,7 +224,7 @@ class AuthX:
         user_unverified = from_dict(User, payload)
         user_unverified.protected()
 
-        user = await Queries.create_user(user_unverified.to_dict(), self.configs.MODEL)
+        user = await Repository.create_user(user_unverified.to_dict())
         if not user:
             return ResponseContext(
                 status_code=status.HTTP_400_BAD_REQUEST, errors=self.USER_NOT_CREATED
@@ -246,7 +243,7 @@ class AuthX:
         Returns:
             ResponseContext: response OK if exist user else NOT_FOUND.
         """
-        user = await Queries.find_user(self.configs.MODEL, username)
+        user = await Repository.find_user(username)
         if user:
             return ResponseContext(status_code=status.HTTP_200_OK, content={})
 
@@ -271,11 +268,11 @@ class AuthX:
         model.username = context.extras.get("username")
         model.name = f"{model.username}_{model.name}"
         model.path = f"/{model.username}{model.path}"
-        user = await Queries.find_user(self.configs.MODEL, model.username)
+        user = await Repository.find_user(model.username)
         if not user:
             raise ExceptionUserNotFound
 
-        models_created = await Queries.max_models(model.username)
+        models_created = await Repository.max_models_by_user(model.username)
         if models_created >= user.allowed_models:
             raise ExceptionAllowedModels
         return model
