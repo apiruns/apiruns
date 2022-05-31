@@ -87,7 +87,7 @@ class AdminController:
         if "username" in context.extras:
             username = context.extras.get("username")
 
-        models = await cls.repository.list_models(username)
+        models = await cls.repository.list_models(username=username)
         return JSONResponse(content=models)
 
     @classmethod
