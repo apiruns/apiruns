@@ -1,4 +1,5 @@
 <!-- docs/_sidebar.md -->
 
-* [Home](/)
-* [Guide](summary.md)
+* [Summary](/)
+    * [Administration](administration/README.md)
+    * [Features](summary.md)

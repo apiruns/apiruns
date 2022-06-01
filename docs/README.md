@@ -4,7 +4,21 @@
 Apisrun a self-configurable api based on [fastapi](https://github.com/tiangolo/fastapi), it allows you to create, modify and delete resources with a simple request. *Creating an api has never been so easy.*
 
 
-## Start project.
+## Contents
+
+- [Start project](#start-project)
+  - [Create a new endpoint](#create-a-new-endpoint)
+  - [Create a new record](#create-a-new-record)
+  - [Get all records](#get-all-records)
+  - [Retrieve a record](#retrieve-a-record)
+  - [Edit a record](#edit-a-record)
+  - [Update a record](#update-a-record)
+  - [Delete a record](#delete-a-record)
+- [Administration](administration/README.md#apisrun-administraction)
+     
+
+
+### Start project.
 
 1. Create & Activate the virtual environment.
 
@@ -22,7 +36,7 @@ or Poetry
 poetry install && poetry shell
 ```
 
-2. DB.
+2. Start DB.
 
 Run this project it is necessary to have a [mongodb](https://www.mongodb.com/en/what-is-mongodb) service up. if it is your preference you can use docker: `docker run -it -v mongodata:/data/db -p 27017:27017 --name mongodb -d mongo`. By default it connects to this container.
 
@@ -52,7 +66,7 @@ This command exposes the resource `http://localhost` on the port `:8000`.
 * API Health `GET http://localhost:8000/ping/`
 * API Administration `GET|POST|DELETE http://localhost:8000/admin/models/`
 
-## Create a new endpoint.
+### Create a new endpoint.
 
 Creating a new endpoint is as easy as defining 2 fields in the body of the following resource:
 
@@ -146,12 +160,36 @@ POST `http://localhost:8000/users/`
 }
 ```
 
-**public_id:** It is the identifier of the record.
+When creating a new record, it returns a `public_id` field that represents a unique identifier of the resource. This new record enables 4 method http:
+
+- GET `http://localhost:8000/users/422594e5-ad62-4d56-837e-eab6270bf0f5/`
+- PATCH `http://localhost:8000/users/422594e5-ad62-4d56-837e-eab6270bf0f5/`
+- PUT `http://localhost:8000/users/422594e5-ad62-4d56-837e-eab6270bf0f5/`
+- DELETE `http://localhost:8000/users/422594e5-ad62-4d56-837e-eab6270bf0f5/`
 
 
-#TODO
+### Get all records.
 
-* Retrieve
+To list all records in `/users/` we need to execute the following request.
+
+GET `http://localhost:8000/users/`
+
+*Response 200*
+```json
+[
+    {
+        "username": "some",
+        "age": 30,
+        "is_admin": false,
+        "level": 10.1,
+        "public_id": "422594e5-ad62-4d56-837e-eab6270bf0f5"
+    }
+]
+```
+
+### Retrieve a record.
+
+To retrieve a record in `/users/` we need to execute the following request with `public_id` identifier.
 
 GET `http://localhost:8000/users/422594e5-ad62-4d56-837e-eab6270bf0f5/`
 
@@ -166,258 +204,49 @@ GET `http://localhost:8000/users/422594e5-ad62-4d56-837e-eab6270bf0f5/`
 }
 ```
 
-* List
 
-GET `http://localhost:8000/users/`
 
-*Response 200*
-```json
-[
-    {
-        "username": "pepito",
-        "age": 30,
-        "is_admin": false,
-        "level": 10.1,
-        "public_id": "422594e5-ad62-4d56-837e-eab6270bf0f5"
-    }
-]
-```
+### Edit a record.
 
-* Updating
-
-PUT `http://localhost:8000/users/422594e5-ad62-4d56-837e-eab6270bf0f5/`
-
-*Request*
-```json
-{
-    "username": "juan",
-    "age": 38,
-    "is_admin": false,
-    "level": 11.1
-}
-```
-
-*Response 204*
-
-* Editing
+To edit a record in `/users/` we need to execute the following request with `public_id` identifier.
 
 PATCH `http://localhost:8000/users/422594e5-ad62-4d56-837e-eab6270bf0f5/`
 
 *Request*
 ```json
 {
-    "username": "sofi"
+    "age": 38,
 }
 ```
 
-*Response 204*
+*Response 204 no content*
 
-* Deleting
+### Update a record.
+
+To update a record in `/users/` we need to execute the following request with `public_id` identifier.
+
+
+PUT `http://localhost:8000/users/422594e5-ad62-4d56-837e-eab6270bf0f5/`
+
+*Request*
+```json
+{
+    "username": "Jorge",
+    "age": 39,
+    "is_admin": false,
+    "level": 11.1
+}
+```
+
+*Response 204 no content*
+
+
+### Delete a record.
+
+To delete a record in `/users/` we need to execute the following request with `public_id` identifier.
+
 
 DELETE `http://localhost:8000/users/422594e5-ad62-4d56-837e-eab6270bf0f5/`
 
 
-*Response 204*
-
-### List created resources.
-
-GET `http://localhost:8000/admin/models/`
-
-*Request*
-```json
-[
-    {
-        "public_id": "c056e69e-b0e0-4fcb-a946-85f6c9f6caed",
-        "created_at": "2022-03-23T00:09:45.708193+00:00",
-        "updated_at": null,
-        "deleted_at": null,
-        "path": "/users/",
-        "schema": {
-            "username": {
-                "type": "string",
-                "required": true
-            },
-            "age": {
-                "type": "integer",
-                "required": true
-            },
-            "is_admin": {
-                "type": "boolean",
-                "required": true
-            },
-            "level": {
-                "type": "float",
-            }
-        },
-        "name": "model_c077e69e-b0e0-4fcb-a946-85f6c9f6cero",
-    }
-]
-```
-
-### Status code custom.
-
-POST `http://localhost:8000/admin/models/`
-
-*Request*
-```json
-{
-    "path": "/inventory",
-    "schema": {
-        "username": {
-            "type": "string",
-            "required": true
-        },
-        "age": {
-            "type": "integer",
-            "required": true
-        },
-        "is_admin": {
-            "type": "boolean",
-            "required": true
-        },
-        "level": {
-            "type": "float",
-        }
-    },
-    "status_code": {
-        "get": 200,
-        "post": 201,
-        "put": 200,
-        "patch": 400,
-        "delete": 404
-    }
-}
-```
-* **status_code:** customize the status codes to return for each http method.
-
-*Response 201*
-
-```json
-{
-    "public_id": "c056e69e-b0e0-4fcb-a946-85f6c9f6caed",
-    "created_at": "2022-03-23T00:09:45.708193+00:00",
-    "updated_at": null,
-    "deleted_at": null,
-    "path": "/inventory",
-    "schema": {
-        "username": {
-            "type": "string",
-            "required": true
-        },
-        "age": {
-            "type": "integer",
-        },
-        "is_admin": {
-            "type": "boolean",
-        },
-        "level": {
-            "type": "float"
-        }
-    },
-    "name": "model_c077e69e-b0e0-4fcb-a946-85f6c9f6cero",
-    "status_code": {
-        "get": 200,
-        "post": 201,
-        "put": 200,
-        "patch": 400,
-        "delete": 404
-    }
-}
-```
-
-
-### Static Model.
-
-POST `http://localhost:8000/admin/models/`
-
-*Request*
-```json
-{
-    "path": "/inventory",
-    "schema": {
-        "username": {
-            "type": "string",
-            "required": true
-        },
-        "age": {
-            "type": "integer",
-            "required": true
-        },
-        "is_admin": {
-            "type": "boolean",
-            "required": true
-        },
-        "level": {
-            "type": "float",
-        }
-    },
-    "static": {
-        "all": {"this": "mock"}
-    }
-}
-```
-* **static:** this feature allows to return a static json according to the defined method, in this example it returns the same json for `all` the methods.
-
-*Response 201*
-
-```json
-{
-    "public_id": "c056e69e-b0e0-4fcb-a946-85f6c9f6caed",
-    "created_at": "2022-03-23T00:09:45.708193+00:00",
-    "updated_at": null,
-    "deleted_at": null,
-    "path": "/inventory",
-    "schema": {
-        "username": {
-            "type": "string",
-            "required": true
-        },
-        "age": {
-            "type": "integer",
-        },
-        "is_admin": {
-            "type": "boolean",
-        },
-        "level": {
-            "type": "float"
-        }
-    },
-    "name": "model_c077e69e-b0e0-4fcb-a946-85f6c9f6cero",
-    "static": {
-        "all": {"this": "mock"}
-    }
-}
-```
-
-Example by method:
-
-POST `http://localhost:8000/admin/models/`
-
-*Request*
-```json
-{
-    "path": "/inventory",
-    "schema": {
-        "username": {
-            "type": "string",
-            "required": true
-        },
-        "age": {
-            "type": "integer",
-            "required": true
-        },
-        "is_admin": {
-            "type": "boolean",
-            "required": true
-        },
-        "level": {
-            "type": "float",
-        }
-    },
-    "static": {
-        "get": {"this": "mock get"},
-        "post": {"this": "mock post"},
-        "put": {"this": "mock put"},
-    }
-}
-```
+*Response 204 con content*
