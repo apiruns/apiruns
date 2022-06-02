@@ -117,7 +117,7 @@ class Repository(Base):
         Returns:
             Union[User, None]: Return `User` if was success else `None`.
         """
-        obj = await cls.create_one(cls._config.USER_MODEL, data)
+        obj = await cls.create_one(cls._config.USER_MODEL, data, cls.excluded)
         return from_dict(User, obj) if obj else None
 
     @classmethod
