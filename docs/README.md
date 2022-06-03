@@ -1,11 +1,11 @@
 <p align="center">
-  <a href="#"><img src="pictures/apisrun.png" alt="Apisrun"></a>
+  <a href="#"><img src="pictures/apiruns.png" alt="Apiruns"></a>
 </p>
 
-# <center> What's Apisrun ? </center>
+# <center> What's Apiruns ? </center>
 
 
-Apisrun a self-configurable api based on [fastapi](https://github.com/tiangolo/fastapi), it allows you to create, modify and delete resources with a simple request. *Creating an api has never been so easy.*
+Apiruns a self-configurable api based on [fastapi](https://github.com/tiangolo/fastapi), it allows you to create, modify and delete resources with a simple request. *Creating an api has never been so easy.*
 
 
 ## Contents
@@ -18,8 +18,12 @@ Apisrun a self-configurable api based on [fastapi](https://github.com/tiangolo/f
   - [Edit a record](#edit-a-record)
   - [Update a record](#update-a-record)
   - [Delete a record](#delete-a-record)
-- [Administration](administration/README.md#apisrun-administraction)
-     
+- [Administration](administration/README.md#Administration)
+    - [Create a simple model](administration/README.md#Create-a-simple-model)
+    - [List all models](administration/README.md#List-all-models)
+    - [Delete a model](administration/README.md#Delete-a-model)
+    - [Status code custom](administration/README.md#status-code-custom)
+    - [Static response](administration/README.md#Static-response)
 
 
 ### Start project.
