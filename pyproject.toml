@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "apisrun"
+name = "apiruns"
 version = "0.0.1"
-description = "Apisrun is a tool to create microservices in an agile way."
-authors = ["Jose Salas <josephsalas.developer@gmail.com>"]
+description = "Apiruns a self-configurable api based on fastapi, it allows you to create, modify and delete resources with a simple request."
+authors = ["Jose Salas <jose.salas@apiruns.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
