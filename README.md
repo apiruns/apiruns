@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="#"><img src="pictures/apiruns.png" alt="Apiruns"></a>
+  <a href="#"><img src="docs/pictures/apiruns.png" alt="Apiruns"></a>
 </p>
 
 # <center> What's Apiruns ? </center>
