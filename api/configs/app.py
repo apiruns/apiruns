@@ -3,7 +3,7 @@ import os
 # Engine configs
 ENGINE_URI_DEFAULT = "mongodb://0.0.0.0:27017/"
 ENGINE_NAME = os.environ.get("ENGINE_NAME", "MONGO")
-ENGINE_DB_NAME = os.environ.get("ENGINE_DB_NAME", "apisrun")
+ENGINE_DB_NAME = os.environ.get("ENGINE_DB_NAME", "apiruns")
 ENGINE_URI = os.environ.get("ENGINE_URI", ENGINE_URI_DEFAULT)
 
 # Mongo
@@ -21,7 +21,7 @@ ORIGINS = ORIGINS_PROD.split(",") if ORIGINS_PROD else ORIGINS_DEFAULT
 VALIDATOR_NAME = "CERBERUS"
 
 # Models
-MODEL_ADMIN_NAME = "apisrun_models"
+MODEL_ADMIN_NAME = "apiruns_models"
 IDENTIFIER_ID = "public_id"
 QUERY_LIMIT = 50
 PATH_SECTION = 7
@@ -34,10 +34,10 @@ INTERNALS = {
         "JWT_EXP": int(os.environ.get("MICRO_JWT_EXP", 3600)),
         "JWT_ALGORITHM": "HS256",
         "MODEL": MODEL_ADMIN_NAME,
-        "MODEL_ROWS": "apisrun_rows",
+        "MODEL_ROWS": "apiruns_rows",
         "SIGN_IN_PATH": "/admin/users/signin",
         "REGISTER_PATH": "/admin/users",
         "ALLOWED_MODELS": int(os.environ.get("MICRO_ALLOWED_MODELS", 10)),
-        "USER_MODEL": "apisrun_users",
+        "USER_MODEL": "apiruns_users",
     }
 }
