@@ -18,12 +18,6 @@ Apiruns a self-configurable api based on [fastapi](https://github.com/tiangolo/f
   - [Edit a record](#edit-a-record)
   - [Update a record](#update-a-record)
   - [Delete a record](#delete-a-record)
-- [Administration](administration/README.md#Administration)
-    - [Create a simple model](administration/README.md#Create-a-simple-model)
-    - [List all models](administration/README.md#List-all-models)
-    - [Delete a model](administration/README.md#Delete-a-model)
-    - [Status code custom](administration/README.md#status-code-custom)
-    - [Static response](administration/README.md#Static-response)
 - [Full documentation](https://josesalasdev.github.io/apiruns/)
 
 
