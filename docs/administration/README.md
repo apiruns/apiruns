@@ -208,7 +208,7 @@ POST `{host}/admin/models/`
 
 | Field       | Description                                    |
 | ----------- | -----------------------------------------------|
-| **static** | | This field allows to return a json for each http method, the http methods that are not specified will be automatically disabled |
+| **static** |  This field allows to return a json for each http method, the http methods that are not specified will be automatically disabled |
 
 
 **Response 201 CREATED**

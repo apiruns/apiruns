@@ -30,3 +30,12 @@ async def internal_handle(context: RequestContext) -> Union[ResponseContext, Non
             break
 
     return ctx_response
+
+
+def feature_handle_routes():
+
+    routers = []
+    for feature in features.values():
+        if feature.is_on:
+            routers.append(feature.routers)
+    return routers

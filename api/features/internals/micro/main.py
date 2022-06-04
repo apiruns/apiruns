@@ -1,10 +1,11 @@
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
+from fastapi import APIRouter
 
 import jwt
 from dacite import from_dict
-from fastapi import status
+from fastapi import status, Request
 
 from .exceptions import ExceptionAllowedModels
 from .exceptions import ExceptionUserNotFound
@@ -15,6 +16,33 @@ from api.configs import route_config
 from api.datastructures import Model
 from api.datastructures import RequestContext
 from api.datastructures import ResponseContext
+
+
+_router = APIRouter()
+
+
+# Feature create users
+@_router.post(route_config.RouterAdmin.MICRO_USER)
+async def create_users(request: Request):
+    """Create users."""
+    response = await Micro().create_user(request.state.input_context)
+    return response.json_response()
+
+
+# Feature users sign in
+@_router.post(route_config.RouterAdmin.MICRO_SIGN_IN)
+async def users_sign(request: Request):
+    """Users sign in."""
+    response = await Micro().users_sign(request.state.input_context)
+    return response.json_response()
+
+
+# Feature get user
+@_router.get(route_config.RouterAdmin.MICRO_USER)
+async def get_user(request: Request, name: str):
+    """Get user."""
+    response = await Micro().user(request.state.input_context, name)
+    return response.json_response()
 
 
 class Micro:
@@ -33,6 +61,11 @@ class Micro:
 
     def __init__(self):
         self.configs = get_config()
+
+    @property
+    def routers(self) -> APIRouter:
+        """Micro routers"""
+        return _router
 
     async def handle(self, context: RequestContext) -> ResponseContext:
         """Handle feature entrypoint.
