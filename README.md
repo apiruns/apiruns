@@ -18,7 +18,7 @@ Apiruns a self-configurable api based on [fastapi](https://github.com/tiangolo/f
   - [Edit a record](#edit-a-record)
   - [Update a record](#update-a-record)
   - [Delete a record](#delete-a-record)
-- [Full documentation](https://josesalasdev.github.io/apiruns/)
+- [Full documentation](https://apiruns.github.io/apiruns/)
 
 
 ### Start project.
@@ -256,4 +256,4 @@ DELETE `http://localhost:8000/users/422594e5-ad62-4d56-837e-eab6270bf0f5/`
 
 ### Documentation
 
-👉  [Go to Documentation](https://josesalasdev.github.io/apiruns/) 👈
+👉  [Go to Documentation](https://apiruns.github.io/apiruns/) 👈
