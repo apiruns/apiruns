@@ -1,16 +1,18 @@
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
-from fastapi import APIRouter
 
 import jwt
 from dacite import from_dict
-from fastapi import status, Request
+from fastapi import APIRouter
+from fastapi import Request
+from fastapi import status
 
 from .exceptions import ExceptionAllowedModels
 from .exceptions import ExceptionUserNotFound
+from .models import get_config
 from .models import Repository
-from .models import User, get_config
+from .models import User
 from .serializers import MicroSerializer
 from api.configs import route_config
 from api.datastructures import Model
@@ -25,7 +27,8 @@ _router = APIRouter()
 @_router.post(route_config.RouterAdmin.MICRO_USER)
 async def create_users(request: Request):
     """Create users."""
-    response = await Micro().create_user(request.state.input_context)
+    context = request.state.input_context
+    response = await Micro().create_user(context.body)
     return response.json_response()
 
 
@@ -33,15 +36,16 @@ async def create_users(request: Request):
 @_router.post(route_config.RouterAdmin.MICRO_SIGN_IN)
 async def users_sign(request: Request):
     """Users sign in."""
-    response = await Micro().users_sign(request.state.input_context)
+    context = request.state.input_context
+    response = await Micro().authentication(context.body)
     return response.json_response()
 
 
 # Feature get user
 @_router.get(route_config.RouterAdmin.MICRO_USER)
-async def get_user(request: Request, name: str):
+async def get_user(name: str):
     """Get user."""
-    response = await Micro().user(request.state.input_context, name)
+    response = await Micro().exist_user(name)
     return response.json_response()
 
 
@@ -60,6 +64,7 @@ class Micro:
     FORBIDDEN = {"error": "you do not have permission to consume this resource."}
 
     def __init__(self):
+        """Set config"""
         self.configs = get_config()
 
     @property
@@ -85,7 +90,8 @@ class Micro:
         return response
 
     def _has_permission(self, response: ResponseContext, path: str) -> ResponseContext:
-        """Current user has permission.
+        """User has has permission.
+
         Args:
             response (ResponseContext): response.
             path (str): current path.
@@ -130,7 +136,7 @@ class Micro:
         """
         return self.configs.ON
 
-    def encode(self, **kwargs: dict) -> str:
+    def encode(self, **kwargs: dict) -> bytes:
         """Create JWT token.
 
         Args:
@@ -195,11 +201,12 @@ class Micro:
 
         Args:
             payload (dict): payload request.
-            example:
-                {
-                    "username": "user",
-                    "password": "secret"
-                }
+
+        Example:
+            {
+                "username": "user",
+                "password": "secret"
+            }
 
         Returns:
             ResponseContext: response context.
@@ -233,11 +240,12 @@ class Micro:
 
         Args:
             payload (dict): payload request.
-            example:
-                {
-                    "username": "user",
-                    "password": "secret"
-                }
+
+        Example:
+            {
+                "username": "user",
+                "password": "secret"
+            }
 
         Returns:
             ResponseContext: response context.
