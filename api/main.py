@@ -1,13 +1,13 @@
+from fastapi import Depends
 from fastapi import FastAPI
-from fastapi import Request, Depends
+from fastapi import Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from api.configs import app_configs
-from api.exceptions import BaseException
-from api.routers import admin, core
 from api.dependencies import global_middleware
-from api.features.internals import feature_handle_routes
+from api.exceptions import BaseException
+from api.routers import get_routers
 
 
 app = FastAPI(dependencies=[Depends(global_middleware)])
@@ -19,11 +19,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-feature_routers = feature_handle_routes()
-for r in feature_routers:
+routers = get_routers()
+for r in routers:
     app.include_router(r)
-app.include_router(admin.router)
-app.include_router(core.router)
 
 
 @app.exception_handler(BaseException)

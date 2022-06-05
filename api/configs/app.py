@@ -26,6 +26,9 @@ IDENTIFIER_ID = "public_id"
 QUERY_LIMIT = 50
 PATH_SECTION = 7
 
+# Admin controllers
+ADMIN_CONTROLLER = bool(os.environ.get("ADMIN_CONTROLLER", True))
+
 # Features
 INTERNALS = {
     "MICRO": {
