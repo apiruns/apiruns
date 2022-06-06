@@ -23,24 +23,6 @@ VALIDATOR_NAME = "CERBERUS"
 # Models
 MODEL_ADMIN_NAME = "apiruns_models"
 IDENTIFIER_ID = "public_id"
-QUERY_LIMIT = 50
-PATH_SECTION = 7
 
 # Admin controllers
 ADMIN_CONTROLLER = bool(os.environ.get("ADMIN_CONTROLLER", True))
-
-# Features
-INTERNALS = {
-    "MICRO": {
-        "ON": bool(os.environ.get("MICRO", False)),
-        "JWT_SECRET": os.environ.get("MICRO_JWT_SECRET", "SUPER_SECRET"),
-        "JWT_EXP": int(os.environ.get("MICRO_JWT_EXP", 3600)),
-        "JWT_ALGORITHM": "HS256",
-        "MODEL": MODEL_ADMIN_NAME,
-        "MODEL_ROWS": "apiruns_rows",
-        "SIGN_IN_PATH": "/admin/users/signin",
-        "REGISTER_PATH": "/admin/users",
-        "ALLOWED_MODELS": int(os.environ.get("MICRO_ALLOWED_MODELS", 10)),
-        "USER_MODEL": "apiruns_users",
-    }
-}

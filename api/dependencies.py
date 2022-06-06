@@ -1,11 +1,9 @@
-from fastapi import Request
 import json
 
+from fastapi import Request
 
 from api.datastructures import RequestContext
-from api.features.internals import features
-from api.features.internals import InternalFeature
-from api.exceptions import BaseException
+from api.features.config import get_feature_middleware
 
 
 async def validate_body(request: Request) -> dict:
@@ -41,17 +39,15 @@ async def get_context(request: Request) -> RequestContext:
     )
 
 
-async def global_middleware(request: Request):
+async def global_middleware(request: Request) -> None:
+    """Global middleware.
+
+    Args:
+        request (Request): request object.
+    """
     context = await get_context(request)
-    micro = features.get(InternalFeature.MICRO)
-    if micro.is_on():
-        response = await micro.handle(context)
-        if response.content:
-            context.extras = response.content
-        if response.errors:
-            raise BaseException(
-                content=response.errors,
-                status_code=response.status_code,
-            )
+    context_modified = get_feature_middleware()
+    if context_modified:
+        context = context_modified
 
     request.state.input_context = context

@@ -3,8 +3,6 @@ from fastapi.responses import JSONResponse
 
 from api.configs import route_config as rt
 from api.datastructures import RequestContext
-from api.features.internals import features
-from api.features.internals import InternalFeature
 from api.repositories import repository_from_feature
 from api.serializers.admin import AdminSerializer
 
@@ -59,10 +57,6 @@ class AdminController:
                 content={"error": "the path already exists, is admin path."},
             )
 
-        micro = features.get(InternalFeature.MICRO)
-        if micro.is_on():
-            model_p = await micro.creation_model_validation(model_p, context)
-
         model = await cls.repository.exist_path_or_model(model_p.path, model_p.name)
         if model:
             name = "path" if model.path == model_p.path else "model"
@@ -83,11 +77,7 @@ class AdminController:
         Returns:
             list: List of models.
         """
-        username = None
-        if "username" in context.extras:
-            username = context.extras.get("username")
-
-        models = await cls.repository.list_models(username=username)
+        models = await cls.repository.list_models()
         return JSONResponse(content=models)
 
     @classmethod
