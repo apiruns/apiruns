@@ -46,7 +46,7 @@ async def global_middleware(request: Request) -> None:
         request (Request): request object.
     """
     context = await get_context(request)
-    context_modified = get_feature_middleware()
+    context_modified = get_feature_middleware(context)
     if context_modified:
         context = context_modified
 

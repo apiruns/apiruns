@@ -25,3 +25,4 @@ MODEL_ADMIN_NAME = "apiruns_models"
 IDENTIFIER_ID = "public_id"
 
 # Internal feature
+FEATURE_INTERNAL_PATH = os.environ.get("FEATURE_INTERNAL_PATH", None)

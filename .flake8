@@ -1,5 +1,5 @@
 [flake8]
 ignore = E226,E302,E41
 max-line-length = 90
-exclude = tests/*, env/*, venv/*
+exclude = tests/*, env/*, venv/*, api/features/internal/*
 max-complexity = 10

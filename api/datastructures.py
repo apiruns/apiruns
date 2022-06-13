@@ -38,6 +38,14 @@ class BaseModel:
 
 
 @dataclass
+class Feature:
+    """Features allowed"""
+
+    internal: dict = field(default_factory=dict)
+    externals: dict = field(default_factory=dict)
+
+
+@dataclass
 class Model(BaseModel):
     """Admin Model"""
 
@@ -46,7 +54,7 @@ class Model(BaseModel):
     schema: dict = field(default_factory=dict)
     status_code: dict = field(default_factory=dict)
     static: Union[None, dict] = None
-    username: Union[None, str] = None
+    features: Feature = field(default_factory=Feature)
 
     def __post_init__(self):
         self.public_id = str(uuid.uuid4())
