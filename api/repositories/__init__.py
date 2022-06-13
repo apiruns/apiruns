@@ -1,6 +1,5 @@
 from api.configs import app_configs
-from api.features import internals
-from api.features.internals.micro import models
+from api.features.config import get_feature_repository
 from api.repositories.mongo import BaseRepository
 from api.repositories.mongo import MongoRepository
 
@@ -15,7 +14,7 @@ def repository_from_feature():
     Returns:
         Repository: repository available.
     """
-    feature = internals.features.get(internals.InternalFeature.MICRO)
-    if feature.is_on():
-        return models.Repository
+    feature_repo = get_feature_repository()
+    if feature_repo:
+        return feature_repo
     return Repository

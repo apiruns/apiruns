@@ -221,7 +221,7 @@ class MongoRepository(BaseRepository):
             response = await cls.find_one(model_name, query, cls.excluded)
             return response
 
-        rows = await cls.find(model_name, query, cls.excluded, cls.limit)
+        rows = await cls.find(model_name, {}, cls.excluded, cls.limit)
         return rows
 
     @classmethod

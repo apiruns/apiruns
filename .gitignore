@@ -146,3 +146,6 @@ cython_debug/
 
 # vscode
 .vscode/
+
+# Features
+api/features/internal/*

@@ -17,8 +17,6 @@ pre-commit = "^2.15.0"
 pytest-mock = "^3.6.1"
 pytest-asyncio = "^0.15.1"
 dacite = "^1.6.0"
-PyJWT = "^2.3.0"
-bcrypt = "^3.2.0"
 dnspython = "^2.2.1"
 
 [tool.poetry.dev-dependencies]
