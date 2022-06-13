@@ -24,5 +24,4 @@ VALIDATOR_NAME = "CERBERUS"
 MODEL_ADMIN_NAME = "apiruns_models"
 IDENTIFIER_ID = "public_id"
 
-# Admin controllers
-ADMIN_CONTROLLER = bool(os.environ.get("ADMIN_CONTROLLER", True))
+# Internal feature
