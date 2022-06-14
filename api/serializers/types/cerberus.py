@@ -90,7 +90,7 @@ class Cerberus:
         Returns:
             dict: empty if was OK or errors if fail.
         """
-        v = Validator(schema, purge_unknown=True)
+        v = Validator(schema, purge_unknown=False)
         v.validate(body)
         return v.errors
 
