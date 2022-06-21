@@ -21,9 +21,9 @@ from api.utils import split_uuid_path
 class BaseModel:
     """Field bases"""
 
-    public_id: str = ""
+    public_id: Union[str, None] = None
     created_at: Union[datetime, str, None] = datetime.now(timezone.utc)
-    updated_at: Union[datetime, str, None] = None
+    updated_at: Union[datetime, str, None] = datetime.now(timezone.utc)
     deleted_at: Union[datetime, str, None] = None
 
     def to_dict(self) -> dict:
@@ -49,8 +49,8 @@ class Feature:
 class Model(BaseModel):
     """Admin Model"""
 
-    path: str = "/"
-    name: str = ""
+    path: Union[None, str] = None
+    name: Union[None, str] = None
     schema: dict = field(default_factory=dict)
     status_code: dict = field(default_factory=dict)
     static: Union[None, dict] = None

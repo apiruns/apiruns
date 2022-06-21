@@ -43,7 +43,7 @@ def get_feature_routers() -> List:
     return []
 
 
-def get_feature_middleware(context) -> Union[None, RequestContext]:
+async def get_feature_middleware(context) -> Union[None, RequestContext]:
     """Get feature middleware.
 
     Args:
@@ -54,7 +54,7 @@ def get_feature_middleware(context) -> Union[None, RequestContext]:
     """
     internal_feature = InternalFeature()
     if internal_feature:
-        return internal_feature.middleware(context)
+        return await internal_feature.middleware(context)
     return None
 
 
