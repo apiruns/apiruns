@@ -57,8 +57,10 @@ class Model(BaseModel):
     features: Feature = field(default_factory=Feature)
 
     def __post_init__(self):
-        self.public_id = str(uuid.uuid4())
-        self.path = paths_without_slash(self.path.strip().lower())
+        if not self.public_id:
+            self.public_id = str(uuid.uuid4())
+        if not self.path:
+            self.path = paths_without_slash(self.path.strip().lower())
         if self.name:
             self.name = self.name.strip().lower()
         else:
