@@ -59,8 +59,7 @@ class Model(BaseModel):
     def __post_init__(self):
         if not self.public_id:
             self.public_id = str(uuid.uuid4())
-        if not self.path:
-            self.path = paths_without_slash(self.path.strip().lower())
+        self.path = paths_without_slash(self.path.strip().lower())
         if self.name:
             self.name = self.name.strip().lower()
         else:
