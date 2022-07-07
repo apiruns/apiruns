@@ -86,6 +86,21 @@ class BaseRepository:
         return response.modified_count
 
     @classmethod
+    async def update_many(cls, collection: str, query: dict, data: dict) -> int:
+        """Update many objects.
+
+        Args:
+            collection (str): Collection name.
+            query (dict): search.
+            data (dict): Data to update.
+
+        Returns:
+            int: Return object updated.
+        """
+        response = await cls.client[collection].update_many(query, {"$set": data})
+        return response.modified_count
+
+    @classmethod
     async def delete_one(cls, collection: str, query: dict) -> int:
         """Delete an object.
 
