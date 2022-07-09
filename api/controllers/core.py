@@ -15,7 +15,6 @@ class CoreController:
     @classmethod
     async def handle(cls, context: RequestContext) -> JSONResponse:
         """Define the service to use according to the http method."""
-
         repositories = {
             rt.HTTPMethod.POST: cls.post,
             rt.HTTPMethod.GET: cls.get,
@@ -94,7 +93,9 @@ class CoreController:
             JSONResponse: response.
         """
         response = await cls.repository.find_one_or_many(
-            context.model.name, context.resource_id
+            context.model.name,
+            context.resource_id,
+            context.query_params,
         )
         if response is not None:
             return JSONResponse(content=response)

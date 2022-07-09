@@ -14,6 +14,8 @@ class BaseRepository:
     main_model = app_configs.MODEL_ADMIN_NAME
     main_field = app_configs.IDENTIFIER_ID
     client = db
+    query_limit = app_configs.MONGO_PAGINATION_LIMIT
+    query_skip = 0
 
     @classmethod
     async def create_one(
@@ -54,7 +56,7 @@ class BaseRepository:
 
     @classmethod
     async def find(
-        cls, collection: str, query: dict, excluded: dict, limit: int
+        cls, collection: str, query: dict, excluded: dict, skip: int, limit: int
     ) -> List:
         """List objects.
 
@@ -62,12 +64,19 @@ class BaseRepository:
             collection (str): Collection name.
             query (dict): search.
             excluded (dict): Query to exclude.
+            skip: skip search.
             limit: limit search.
 
         Returns:
             list: Return list of object found.
         """
-        response = await cls.client[collection].find(query, excluded).to_list(limit)
+        response = (
+            await cls.client[collection]
+            .find(query, excluded)
+            .skip(skip)
+            .limit(limit)
+            .to_list(limit)
+        )
         return response
 
     @classmethod
@@ -147,7 +156,15 @@ class MongoRepository(BaseRepository):
     """Mongo repository"""
 
     excluded = {"_id": 0}  # Fields excluded
-    limit = 100  # Query limit
+
+    @classmethod
+    def get_pagination(cls, params: dict):
+        limit = params.get("limit")
+        page = params.get("page")
+        limit = cls.query_limit if not limit else limit
+        page = cls.query_skip if not page else page
+        skip = (limit * page) if page else page
+        return skip, limit
 
     # Commons
     @classmethod
@@ -157,7 +174,9 @@ class MongoRepository(BaseRepository):
         Returns:
             list: Models found.
         """
-        models = await cls.find(cls.main_model, kwargs, cls.excluded, cls.limit)
+        models = await cls.find(
+            cls.main_model, kwargs, cls.excluded, 0, cls.query_limit
+        )
         return models
 
     @classmethod
@@ -220,13 +239,17 @@ class MongoRepository(BaseRepository):
 
     @classmethod
     async def find_one_or_many(
-        cls, model_name: str, resource_id: str
+        cls,
+        model_name: str,
+        resource_id: str,
+        query_params: dict,
     ) -> Union[dict, list, None]:
         """Find one or more rows.
 
         Args:
             model_name (str): Model name.
             resource_id (str): Resource id.
+            query_params (dict): query params.
 
         Returns:
             Union[dict, list, None]: Return `None` if was not found else list or dict.
@@ -236,7 +259,8 @@ class MongoRepository(BaseRepository):
             response = await cls.find_one(model_name, query, cls.excluded)
             return response
 
-        rows = await cls.find(model_name, {}, cls.excluded, cls.limit)
+        skip, limit = cls.get_pagination(query_params)
+        rows = await cls.find(model_name, {}, cls.excluded, skip, limit)
         return rows
 
     @classmethod
