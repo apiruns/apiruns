@@ -9,6 +9,7 @@ ENGINE_URI = os.environ.get("ENGINE_URI", ENGINE_URI_DEFAULT)
 # Mongo
 MONGO_TLS = bool(os.environ.get("MONGO_TLS", False))
 MONGO_CAFILE = os.environ.get("MONGO_CAFILE", "")
+MONGO_PAGINATION_LIMIT = int(os.environ.get("MONGO_PAGINATION_LIMIT", 20))
 
 ORIGINS_DEFAULT = [
     "http://localhost",

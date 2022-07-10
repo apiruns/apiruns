@@ -111,6 +111,7 @@ class RequestContext:
     body: Any
     original_path: str
     model: Union[Model, None] = None
+    query_params: dict = field(default_factory=dict)
     features: Feature = field(default_factory=Feature)
 
     @property

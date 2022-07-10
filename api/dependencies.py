@@ -4,6 +4,7 @@ from fastapi import Request
 
 from api.datastructures import RequestContext
 from api.features.config import get_feature_middleware
+from api.serializers.context import ContextSerializer
 
 
 async def validate_body(request: Request) -> dict:
@@ -31,11 +32,13 @@ async def get_context(request: Request) -> RequestContext:
         RequestContext: Input context.
     """
     body = await validate_body(request)
+    params = ContextSerializer.query_params_normalize(request.query_params)
     return RequestContext(
         body=body,
         headers=request.headers,
         method=request.method,
         original_path=request.url.path,
+        query_params=params,
     )
 
 
