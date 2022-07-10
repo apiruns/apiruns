@@ -18,6 +18,7 @@ Apiruns a self-configurable api based on [fastapi](https://github.com/tiangolo/f
   - [Edit a record](#edit-a-record)
   - [Update a record](#update-a-record)
   - [Delete a record](#delete-a-record)
+  - [Pagination](#pagination)
 - [Administration](administration/README.md#Administration)
     - [Create a simple model](administration/README.md#Create-a-simple-model)
     - [List all models](administration/README.md#List-all-models)
@@ -258,3 +259,61 @@ DELETE `http://localhost:8000/users/422594e5-ad62-4d56-837e-eab6270bf0f5/`
 
 
 *Response 204 con content*
+
+
+
+### Pagination.
+
+Pagination is an important functionality of an API. Navigate between all results we use `limit` and `page` query params.
+
+
+GET `http://localhost:8000/users?limit=2&page=0`
+
+
+*Response 200 OK*
+```json
+[
+    {
+        "username": "some1",
+        "age": 30,
+        "is_admin": false,
+        "level": 10.1,
+        "public_id": "422594e5-ad62-4d56-837e-eab6270bf0f5"
+    },
+    {
+        "username": "some2",
+        "age": 30,
+        "is_admin": false,
+        "level": 10.1,
+        "public_id": "688594e5-ad62-4d56-837e-eab6270bfTR3"
+    }
+]
+```
+
+GET `http://localhost:8000/users?limit=2&page=1`
+
+
+*Response 200 OK*
+```json
+[
+    {
+        "username": "some3",
+        "age": 30,
+        "is_admin": false,
+        "level": 10.1,
+        "public_id": "445594e5-ad62-4d56-837e-eab6270bf089"
+    },
+    {
+        "username": "some4",
+        "age": 30,
+        "is_admin": false,
+        "level": 10.1,
+        "public_id": "758594e5-ad62-4d56-837e-eab6270bfiop"
+    }
+]
+```
+
+| Query param | Description                                    |
+| ----------- | -----------------------------------------------|
+| **limit**   | It is the number of results you want to limit the search for. default 20 rows.|
+| **page**    | It is the number of pages you want to access, it starts at 0 and is tied to the `limit`. |
