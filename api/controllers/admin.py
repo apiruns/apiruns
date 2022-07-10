@@ -77,7 +77,7 @@ class AdminController:
         Returns:
             list: List of models.
         """
-        models = await cls.repository.list_models()
+        models = await cls.repository.list_models(filters=context.query_params)
         return JSONResponse(content=models)
 
     @classmethod

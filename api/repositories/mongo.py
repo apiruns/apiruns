@@ -1,4 +1,5 @@
 from typing import List
+from typing import Tuple
 from typing import Union
 
 from dacite import from_dict
@@ -158,9 +159,14 @@ class MongoRepository(BaseRepository):
     excluded = {"_id": 0}  # Fields excluded
 
     @classmethod
-    def get_pagination(cls, params: dict):
-        limit = params.get("limit")
-        page = params.get("page")
+    def get_pagination(cls, **kwargs) -> Tuple[int, int]:
+        """Get pagination params.
+
+        Returns:
+            Tuple[int, int]: skip adn limit params for query.
+        """
+        limit = kwargs.get("limit")
+        page = kwargs.get("page")
         limit = cls.query_limit if not limit else limit
         page = cls.query_skip if not page else page
         skip = (limit * page) if page else page
@@ -168,15 +174,17 @@ class MongoRepository(BaseRepository):
 
     # Commons
     @classmethod
-    async def list_models(cls, **kwargs) -> list:
+    async def list_models(cls, filters={}, **kwargs) -> list:
         """List models.
 
+        Args:
+            filters (dict, optional): Query filters. Defaults to {}.
+
         Returns:
-            list: Models found.
+            list: Results.
         """
-        models = await cls.find(
-            cls.main_model, kwargs, cls.excluded, 0, cls.query_limit
-        )
+        skip, limit = cls.get_pagination(**filters)
+        models = await cls.find(cls.main_model, kwargs, cls.excluded, skip, limit)
         return models
 
     @classmethod
@@ -259,7 +267,7 @@ class MongoRepository(BaseRepository):
             response = await cls.find_one(model_name, query, cls.excluded)
             return response
 
-        skip, limit = cls.get_pagination(query_params)
+        skip, limit = cls.get_pagination(**query_params)
         rows = await cls.find(model_name, {}, cls.excluded, skip, limit)
         return rows
 
