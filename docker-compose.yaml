@@ -2,21 +2,28 @@ version: '3.3'
 
 services:
   db:
+    container_name: mongo-db
     image: mongo
     restart: always
     volumes:
       - mongodata:/data/db
+    ports:
+      - 27017:27017
 
   app:
     container_name: apiruns
     build:
       context: .
-      dockerfile: Dockerfile.local
+      dockerfile: Dockerfile
     ports:
-      - 8080:8080
+      - 8000:80
+    environment:
+      - MODULE_NAME=api.main
+      - ENGINE_DB_NAME=apiruns
+      - ENGINE_URI=mongodb://mongo-db:27017/
     restart: on-failure
     volumes:
-      - .:/app
+      - .:/api
     depends_on:
       - db
     #env_file:
