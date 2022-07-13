@@ -57,6 +57,11 @@ with docker:
 docker-compose up
 ```
 
+from docker hub:
+```
+docker pull josesalasdev/apiruns
+```
+
 3. Launch the service.
 
 ```bash
