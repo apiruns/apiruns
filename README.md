@@ -52,6 +52,16 @@ export ENGINE_DB_NAME="mydb"
 export ENGINE_URI="mongodb://{user}:{password}@{host|ip}:{port}/"
 ```
 
+with docker:
+```bash
+docker-compose up
+```
+
+from docker hub:
+```
+docker pull josesalasdev/apiruns
+```
+
 3. Launch the service.
 
 ```bash
