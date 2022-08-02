@@ -32,7 +32,7 @@ async def get_context(request: Request) -> RequestContext:
         RequestContext: Input context.
     """
     body = await validate_body(request)
-    params = ContextSerializer.query_params_normalize(request.query_params)
+    params = ContextSerializer.query_params(request.query_params)
     return RequestContext(
         body=body,
         headers=request.headers,

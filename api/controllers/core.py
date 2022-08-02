@@ -121,9 +121,9 @@ class CoreController:
                 content={"error": f"Resource `{context.original_path}` not found !"},
             )
 
-        valid, data = CoreSerializer.validate(context.body, context.model.schema)
-        if not valid:
-            return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=data)
+        errors, data = CoreSerializer.model(context.body, context.model.schema)
+        if errors:
+            return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=errors)
 
         response = await cls.repository.create_row(context.model.name, data)
         return JSONResponse(status_code=status.HTTP_201_CREATED, content=response)
@@ -138,9 +138,11 @@ class CoreController:
         Returns:
             JSONResponse: response.
         """
-        valid, data = CoreSerializer.validate_update(context.body, context.model.schema)
-        if not valid:
-            return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=data)
+        errors, data = CoreSerializer.model(
+            context.body, context.model.schema, is_update=True
+        )
+        if errors:
+            return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=errors)
         await cls.repository.update_row(context.model.name, context.resource_id, data)
         return JSONResponse(status_code=status.HTTP_204_NO_CONTENT, content="")
 

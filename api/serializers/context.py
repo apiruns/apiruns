@@ -1,7 +1,7 @@
-from cerberus import Validator
+from .base import Cerberus
 
 
-class ContextSerializer:
+class ContextSerializer(Cerberus):
     """Context Serializer"""
 
     QUERY_PARAMS = {
@@ -10,16 +10,19 @@ class ContextSerializer:
     }
 
     @classmethod
-    def query_params_normalize(cls, params):
-        """Normalize query params
+    def query_params(cls, params) -> dict:
+        """Serialize query params.
 
         Args:
-            params (dict): query params not serialized.
+            params (dict): Query params.
 
         Returns:
-            dict: Data serialized.
+            dict: Query params serialized.
         """
         if not params:
             return {}
-        v = Validator(cls.QUERY_PARAMS, purge_unknown=True)
-        return v.normalized(dict(params))
+
+        errors, data = cls._serialize(cls.QUERY_PARAMS, dict(params), purge=True)
+        if errors:
+            return {}
+        return data

@@ -1,48 +1,42 @@
 import uuid
-from typing import Any
 from typing import Tuple
+from typing import Union
 
+from .base import Cerberus
 from api.configs import app_configs
-from api.serializers import Serializer
+from api.datastructures import Model
 
 
-class CoreSerializer(Serializer):
+class CoreSerializer(Cerberus):
     """Core Serializer"""
 
     @classmethod
-    def validate(cls, body: dict, schema: dict) -> Tuple[bool, Any]:
-        """Validate core.
+    def model(
+        cls, body: dict, schema: dict, is_update: bool = False
+    ) -> Tuple[Union[dict, None], Union[None, Model]]:
+        """Serialize model.
 
         Args:
             body (dict): request body.
-            schema (dict): schema.
+            schema (dict): cerberus schema.
 
         Returns:
-            Tuple[bool, Any]: is valid and errors.
+            Tuple[Union[dict, None], Union[None, Model]]:
+                Returns errors and data serialized.
         """
-        valid, errors = cls.validate_core(body, schema)
-        if not valid:
-            return False, errors
+        errors = cls._validate_schema(schema)
+        if errors:
+            return errors, None
 
-        body[app_configs.IDENTIFIER_ID] = str(uuid.uuid4())
-        return True, body
+        errors, data = cls._serialize(schema, body, purge=False)
+        if errors:
+            return errors, None
 
-    @classmethod
-    def validate_update(cls, body: dict, schema: dict) -> Tuple[bool, Any]:
-        """Validate update core.
+        if not is_update:
+            data[app_configs.IDENTIFIER_ID] = str(uuid.uuid4())
+            return None, data
 
-        Args:
-            body (dict): request body.
-            schema (dict): schema.
+        if app_configs.IDENTIFIER_ID in data:
+            del data[app_configs.IDENTIFIER_ID]
 
-        Returns:
-            Tuple[bool, Any]: is valid and errors.
-        """
-        valid, errors = cls.validate_core(body, schema)
-        if not valid:
-            return False, errors
-
-        if app_configs.IDENTIFIER_ID in body:
-            del body[app_configs.IDENTIFIER_ID]
-
-        return True, body
+        return None, data
