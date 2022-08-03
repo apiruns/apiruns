@@ -2,12 +2,12 @@ import uuid
 from typing import Tuple
 from typing import Union
 
-from .base import Cerberus
+from .base import Serializer
 from api.configs import app_configs
 from api.datastructures import Model
 
 
-class CoreSerializer(Cerberus):
+class CoreSerializer(Serializer):
     """Core Serializer"""
 
     @classmethod

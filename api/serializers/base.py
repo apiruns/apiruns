@@ -5,8 +5,8 @@ from cerberus import Validator
 from cerberus.schema import SchemaError
 
 
-class Cerberus:
-    """Cerberus Serializer"""
+class Serializer:
+    """Base Serializer based in Cerberus"""
 
     @classmethod
     def _validate_schema(cls, schema: dict) -> Union[None, dict]:
@@ -24,8 +24,9 @@ class Cerberus:
         except SchemaError as e:
             return e.args[0]
 
+    @classmethod
     def _serialize(
-        self, schema: dict, data: Union[dict, list], purge: bool = False
+        cls, schema: dict, data: Union[dict, list], purge: bool = False
     ) -> Tuple[dict, Union[dict, list]]:
         """Serialize data.
 

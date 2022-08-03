@@ -3,14 +3,14 @@ from typing import Union
 
 from dacite import from_dict
 
-from .base import Cerberus
+from .base import Serializer
 from .utils import status_code_allowed
 from .utils import upper
 from api.configs import route_config
 from api.datastructures import Model
 
 
-class AdminSerializer(Cerberus):
+class AdminSerializer(Serializer):
     """Admin Serializer"""
 
     MODEL_SCHEMA = {
@@ -70,7 +70,7 @@ class AdminSerializer(Cerberus):
         if errors:
             return errors, None
 
-        errors, data = cls._serialize(cls.MODEL_SCHEMA, body, purge=True)
+        errors, data = cls._serialize(cls.MODEL_SCHEMA, data=body, purge=True)
         if errors:
             return errors, None
 

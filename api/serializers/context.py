@@ -1,7 +1,8 @@
-from .base import Cerberus
+from typing import Union
+from .base import Serializer
 
 
-class ContextSerializer(Cerberus):
+class ContextSerializer(Serializer):
     """Context Serializer"""
 
     QUERY_PARAMS = {
@@ -10,7 +11,7 @@ class ContextSerializer(Cerberus):
     }
 
     @classmethod
-    def query_params(cls, params) -> dict:
+    def query_params(cls, params) -> Union[dict, list]:
         """Serialize query params.
 
         Args:
