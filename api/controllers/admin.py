@@ -45,11 +45,11 @@ class AdminController:
         Returns:
             JSONResponse: response.
         """
-        valid, model_p = AdminSerializer.validate_admin_model(context.body)
-        if not valid:
+        errors, model_p = AdminSerializer.model(context.body)
+        if errors:
             return JSONResponse(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                content=model_p,
+                content=errors,
             )
         if model_p.path in rt.RouterAdmin.excluded():
             return JSONResponse(
@@ -90,8 +90,8 @@ class AdminController:
         Returns:
             JSONResponse: response.
         """
-        valid, errors = AdminSerializer.validate_delete(context.body)
-        if not valid:
+        errors, _ = AdminSerializer.delete_model(context.body)
+        if errors:
             return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content=errors)
 
         await cls.repository.delete_model(context.body.get("name"))

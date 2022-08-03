@@ -18,9 +18,6 @@ ORIGINS_DEFAULT = [
 ORIGINS_PROD = os.environ.get("ORIGINS")
 ORIGINS = ORIGINS_PROD.split(",") if ORIGINS_PROD else ORIGINS_DEFAULT
 
-# Validator configs
-VALIDATOR_NAME = "CERBERUS"
-
 # Models
 MODEL_ADMIN_NAME = "apiruns_models"
 IDENTIFIER_ID = "public_id"
