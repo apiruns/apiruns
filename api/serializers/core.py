@@ -28,15 +28,12 @@ class CoreSerializer(Serializer):
         if errors:
             return errors, None
 
-        errors, data = cls._serialize(schema, body, purge=False)
+        errors, data = cls._serialize(schema, body, purge=True)
         if errors:
             return errors, None
 
         if not is_update:
             data[app_configs.IDENTIFIER_ID] = str(uuid.uuid4())
             return None, data
-
-        if app_configs.IDENTIFIER_ID in data:
-            del data[app_configs.IDENTIFIER_ID]
 
         return None, data
